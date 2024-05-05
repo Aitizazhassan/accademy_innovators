@@ -1,0 +1,12 @@
+
+img.logo-img-front.img-fluid {
+    height: 70px;
+    object-fit: fill;
+}
+
+@media (min-width: 576px)
+{
+    a.link-fx::before {
+        top: 60px;
+    }
+}
