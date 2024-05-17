@@ -6,6 +6,7 @@ use App\Http\Controllers\CrewController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\BoardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AssemblyController;
@@ -54,11 +55,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/create', [UsersController::class, 'create'])->name('users.create')->middleware('permission:user.create');
         Route::post('/users/store', [UsersController::class, 'store'])->name('users.store')->middleware('permission:user.create');
 
-    
+
         // roles
         Route::resource('roles', RoleController::class)->middleware('permission:role.view');
         Route::get('/edit-permission/{id}', [RoleController::class, 'editPermissions'])->name('roles.edit.permissions')->middleware('permission:role.edit');
         Route::put('/update-permission/{id}', [RoleController::class, 'updatePermissions'])->name('roles.update.permissions')->middleware('permission:role.edit');
+
+      // boards
+      Route::get('/boards', [BoardController::class, 'index'])->name('boards.index')->middleware('permission:user.view');
+      Route::get('/boards/{user}', [BoardController::class, 'edit'])->name('boards.edit')->middleware('permission:user.edit');
+      Route::patch('/boards/setting/{user}', [BoardController::class, 'update'])->name('boards.update')->middleware('permission:user.edit');
+      Route::delete('/boards/{user}', [BoardController::class, 'destroy'])->name('boards.destroy')->middleware('permission:user.delete');
+      Route::get('/boards/create', [BoardController::class, 'create'])->name('boards.create')->middleware('permission:user.create');
+      Route::post('/boards/store', [BoardController::class, 'store'])->name('boards.store')->middleware('permission:user.create');
 
 
     });

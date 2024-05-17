@@ -25,7 +25,7 @@
                     @csrf
                     <div class="mb-4">
                     <div class="input-group input-group-lg">
-                        <input type="email" name="email" :value="old('email')" class="form-control" id="email" placeholder="Email">
+                        <input type="email" name="email" :value="old('email')" value="admin@accademy.com"  class="form-control" id="email" placeholder="Email">
                         <span class="input-group-text">
                         <i class="fa fa-user-circle"></i>
                         </span>
@@ -34,7 +34,7 @@
                     </div>
                     <div class="mb-4">
                     <div class="input-group input-group-lg">
-                        <input type="password" :value="old('password')" class="form-control" id="password" name="password" placeholder="Password">
+                        <input type="password" :value="old('password')" class="form-control" value="12345678" id="password" name="password" placeholder="Password">
                         <span class="input-group-text">
                         <i class="fa fa-asterisk"></i>
                         </span>
