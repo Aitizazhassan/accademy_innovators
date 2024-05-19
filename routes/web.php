@@ -17,7 +17,9 @@ use App\Http\Controllers\LaborCodeController;
 use App\Http\Controllers\SourceCodeController;
 use App\Http\Controllers\CrewPositionController;
 use App\Http\Controllers\MaterialCodeController;
-
+use App\Http\Controllers\ClassRoomController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\ChapterController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -44,7 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('permission:profile.edit');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy')->middleware('permission:profile.delete');
 
-    Route::prefix('settings')->group(function(){
+    Route::prefix('settings')->group(function () {
 
         // user routes
         Route::get('/users', [UsersController::class, 'index'])->name('users.index')->middleware('permission:user.view');
@@ -61,13 +63,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit-permission/{id}', [RoleController::class, 'editPermissions'])->name('roles.edit.permissions')->middleware('permission:role.edit');
         Route::put('/update-permission/{id}', [RoleController::class, 'updatePermissions'])->name('roles.update.permissions')->middleware('permission:role.edit');
 
-      // boards
-      Route::get('/boards', [BoardController::class, 'index'])->name('boards.index')->middleware('permission:user.view');
-      Route::get('/boards/{user}', [BoardController::class, 'edit'])->name('boards.edit')->middleware('permission:user.edit');
-      Route::patch('/boards/setting/{user}', [BoardController::class, 'update'])->name('boards.update')->middleware('permission:user.edit');
-      Route::delete('/boards/{user}', [BoardController::class, 'destroy'])->name('boards.destroy')->middleware('permission:user.delete');
-      Route::get('/boards/create', [BoardController::class, 'create'])->name('boards.create')->middleware('permission:user.create');
-      Route::post('/boards/store', [BoardController::class, 'store'])->name('boards.store')->middleware('permission:user.create');
+        // boards
+        Route::get('/boards', [BoardController::class, 'index'])->name('boards.index')->middleware('permission:user.view');
+        Route::get('/boards/{user}', [BoardController::class, 'edit'])->name('boards.edit')->middleware('permission:user.edit');
+        Route::patch('/boards/setting/{user}', [BoardController::class, 'update'])->name('boards.update')->middleware('permission:user.edit');
+        Route::delete('/boards/{user}', [BoardController::class, 'destroy'])->name('boards.destroy')->middleware('permission:user.delete');
+        Route::get('/boards/create', [BoardController::class, 'create'])->name('boards.create')->middleware('permission:user.create');
+        Route::post('/boards/store', [BoardController::class, 'store'])->name('boards.store')->middleware('permission:user.create');
+
+
+        // classroom
+        Route::resource('classroom', ClassRoomController::class);
+        // subject
+        Route::resource('subject', SubjectController::class);
+          // chapter
+        Route::resource('chapter', ChapterController::class);
 
 
     });

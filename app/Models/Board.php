@@ -12,4 +12,10 @@ class Board extends Model
         'name',
 
     ];
+
+    public function classrooms()
+    {
+        return $this->belongsToMany(Classroom::class);
+    }
+
 }

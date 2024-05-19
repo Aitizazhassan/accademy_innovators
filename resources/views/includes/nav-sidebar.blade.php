@@ -88,7 +88,31 @@
             @can('user.view')
             <li class="nav-main-item">
                 <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['boards.index']) ? 'active' : '' }}" href="{{ route('boards.index') }}">
-                    <i class="nav-main-link-icon fa fa-users"></i><span class="nav-main-link-name">Boards</span>
+                    <i class="nav-main-link-icon fas fa-graduation-cap"></i><span class="nav-main-link-name">Boards</span>
+                </a>
+            </li>
+            @endcan
+
+            @can('user.view')
+            <li class="nav-main-item">
+                <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['classroom.index']) ? 'active' : '' }}" href="{{ route('classroom.index') }}">
+                    <i class="nav-main-link-icon fa fa-school"></i><span class="nav-main-link-name">Class Rooms</span>
+                </a>
+            </li>
+            @endcan
+
+            @can('user.view')
+            <li class="nav-main-item">
+                <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['subject.index']) ? 'active' : '' }}" href="{{ route('subject.index') }}">
+                    <i class="nav-main-link-icon fa fa-book"></i><span class="nav-main-link-name">Subject</span>
+                </a>
+            </li>
+            @endcan
+
+            @can('user.view')
+            <li class="nav-main-item">
+                <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['chapter.index']) ? 'active' : '' }}" href="{{ route('chapter.index') }}">
+                    <i class="nav-main-link-icon fa fa-book"></i><span class="nav-main-link-name">Chapter</span>
                 </a>
             </li>
             @endcan

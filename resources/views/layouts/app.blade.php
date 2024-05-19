@@ -25,6 +25,10 @@
         <link rel="stylesheet" href="{{ asset('/assets/js/plugins/datatables-buttons-bs5/css/buttons.bootstrap5.min.css') }}">
         <link rel="stylesheet" href="{{ asset('/assets/js/plugins/datatables-responsive-bs5/css/responsive.bootstrap5.min.css') }}">
         <link rel="stylesheet" href="{{ asset('/assets/js/plugins/select2/css/select2.min.css') }}">
+        {{-- <link rel="stylesheet" href="{{ asset('/assets/css/select2.min.css') }}"> --}}
+
+
+
         <link rel="stylesheet" href="{{ asset('assets/js/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/js/plugins/flatpickr/flatpickr.min.css') }}">
 
@@ -33,7 +37,7 @@
 
         <!-- custom style css-->
         <link rel="stylesheet" id="css-main" href="{{ asset('/assets/css/style.css') }}">
-        
+
         <!-- Include SweetAlert CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -94,6 +98,9 @@
         <script src="{{ asset('assets/js/plugins/pwstrength-bootstrap/pwstrength-bootstrap.min.js') }}"></script>
         <script src="{{ asset('assets/js/plugins/flatpickr/flatpickr.min.js') }}"></script>
 
+        <script src="{{ asset('assets/js/select2.min.js') }}"></script>
+
+
         <!-- Include SweetAlert JS -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -136,7 +143,7 @@
                 }
             });
         </script>
-        
+
         @yield('scripts')
 
         {{-- <script>
