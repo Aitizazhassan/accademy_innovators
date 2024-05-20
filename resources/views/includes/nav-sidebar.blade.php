@@ -116,6 +116,14 @@
                 </a>
             </li>
             @endcan
+
+            @can('user.view')
+            <li class="nav-main-item">
+                <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['topic.index']) ? 'active' : '' }}" href="{{ route('topic.index') }}">
+                    <i class="nav-main-link-icon fa fa-camera"></i><span class="nav-main-link-name">Topic</span>
+                </a>
+            </li>
+            @endcan
         </ul>
         </div>
         <!-- END Side Navigation -->

@@ -20,6 +20,7 @@ use App\Http\Controllers\MaterialCodeController;
 use App\Http\Controllers\ClassRoomController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\TopicController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -79,7 +80,8 @@ Route::middleware('auth')->group(function () {
           // chapter
         Route::resource('chapter', ChapterController::class);
 
-
+        // chapter
+        Route::resource('topic', TopicController::class);
     });
 });
 
