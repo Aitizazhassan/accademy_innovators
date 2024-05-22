@@ -10,12 +10,13 @@ class Board extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'country_id'
 
     ];
 
-    public function classrooms()
+    public function countries()
     {
-        return $this->belongsToMany(Classroom::class);
+        return $this->belongsToMany(Country::class);
     }
 
 }

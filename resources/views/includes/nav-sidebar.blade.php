@@ -87,6 +87,14 @@
 
             @can('user.view')
             <li class="nav-main-item">
+                <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['country.index']) ? 'active' : '' }}" href="{{ route('country.index') }}">
+                    <i class="nav-main-link-icon fas fa-graduation-cap"></i><span class="nav-main-link-name">Country</span>
+                </a>
+            </li>
+            @endcan
+
+            @can('user.view')
+            <li class="nav-main-item">
                 <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['boards.index']) ? 'active' : '' }}" href="{{ route('boards.index') }}">
                     <i class="nav-main-link-icon fas fa-graduation-cap"></i><span class="nav-main-link-name">Boards</span>
                 </a>

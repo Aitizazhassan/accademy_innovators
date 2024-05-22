@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\UserUpdateRequest;
+use App\Http\Requests\BoardUpdateRequest;
+use App\Models\Country;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -61,14 +62,24 @@ class BoardController extends Controller
     public function create()
     {
 
-        return view('boards.create');
+        $pageHead = 'Create Board';
+        $pageTitle = 'Create Board';
+        $activeMenu = 'create_Board';
+
+        $countries  = Country::get();
+
+        return view('boards.create', compact('activeMenu','pageHead','pageTitle','countries'));
+
     }
+
 
     public function store(Request $request)
     {
         // Validate the incoming request data
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255', // Change 'first_name' to 'name'
+            'name' => 'required|string|max:255',
+            'country_id' => 'required|array', // Ensure country_id is an array
+            'country_id.*' => 'exists:countries,id', // Ensure each country_id exists
         ]);
 
         // Check if a board with the same name already exists
@@ -82,32 +93,52 @@ class BoardController extends Controller
         // Create the board
         $board = new Board();
         $board->name = $validatedData['name'];
-
         $board->save();
+
+        // Attach the board to the specified countries
+        $board->countries()->attach($validatedData['country_id']);
 
         // Redirect or return a response as needed
         return redirect()->route('boards.index')->with('success', 'Board created successfully!');
     }
 
 
-    public function edit($id)
+    // public function edit($id)
+    // {
+    //     $board = Board::find($id);
+    //     return view('boards.edit', compact('board'));
+    // }
+    public function edit(Board $board)
     {
-        $board = Board::find($id);
-        return view('boards.edit', compact('board'));
+
+        $pageHead = 'Edit Board';
+        $pageTitle = 'Edit Board';
+        $activeMenu = 'Board';
+
+        $countries = Country::get();
+
+        return view('boards.edit', compact('activeMenu','pageHead','pageTitle','board','countries'));
+
     }
 
-    public function update(UserUpdateRequest $request, User $user): RedirectResponse
+    public function update(BoardUpdateRequest $request, Board $board): RedirectResponse
     {
-        $validatedData = $request->validated();
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'country_id' => 'required|array', // Ensure country_id is an array
+            'country_id.*' => 'exists:countries,id', // Ensure each country_id exists
+        ]);
 
-        $validatedData['name'] = $validatedData['first_name'] . ' ' . $validatedData['last_name'];
-        $user->update($validatedData);
+        // Update the board's name
+        $board->update(['name' => $validatedData['name']]);
 
-        $user->syncRoles($request->role);
+        // Sync the associated countries
+        $board->countries()->sync($validatedData['country_id']);
 
-        // Redirect the user back to the appropriate page with a success message
-        return redirect()->route('users.setting', $user)->with('success', 'User updated successfully');
+        return redirect()->route('boards.index')->with('success', 'Board updated successfully.');
     }
+
 
     public function updatePassword(Request $request, User $user): RedirectResponse
     {
