@@ -104,7 +104,7 @@
             @can('user.view')
             <li class="nav-main-item">
                 <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['classroom.index']) ? 'active' : '' }}" href="{{ route('classroom.index') }}">
-                    <i class="nav-main-link-icon fa fa-school"></i><span class="nav-main-link-name">Class Rooms</span>
+                    <i class="nav-main-link-icon fa fa-school"></i><span class="nav-main-link-name">Class </span>
                 </a>
             </li>
             @endcan

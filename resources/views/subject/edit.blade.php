@@ -21,15 +21,15 @@
                 <div class="row push p-sm-2 p-lg-4">
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="profile-edit-name">Classroom</label>
+                            <label class="form-label" for="profile-edit-name">Class</label>
 
                             <select name="classroom_id[]" id="classroom_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
-                                <option value="">Select</option>
+                                <option disabled value="">Select</option>
 
                                 @forelse ($classrooms as $row)
                                     <option value="{{ $row->id }}" {{ in_array($row->id, old('classroom_id', $subject->classrooms->pluck('id')->toArray())) ? 'selected' : '' }}>{{ $row->name }}</option>
                                 @empty
-                                    <option value="">No classrooms found</option>
+                                    <option value="">No class found</option>
                                 @endforelse
                             </select>
 

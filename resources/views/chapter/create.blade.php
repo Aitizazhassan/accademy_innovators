@@ -21,9 +21,9 @@
                 <div class="row push p-sm-2 p-lg-4">
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="profile-edit-name">Subject</label>
+                            <label class="form-label" for="profile-edit-name">Subject Name</label>
                            <select name="subject_id[]" id="classroom_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
-                                <option value="">select</option>
+                                <option disabled value="">select</option>
                                 @forelse ($subjects as $row)
                                     <option value="{{ $row->id }}" {{ old('subject_id') == $row->id?'selected':'' }}>{{ $row->name }}</option>
                                 @empty
@@ -35,10 +35,9 @@
                     </div>
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="profile-edit-name">Subject Name</label>
-                            <input type="text" name="name" value="{{ old('name') }}" autocomplete="name"
-                                class="form-control form-contol-sm select2" id="profile-edit-name" placeholder="Enter Name">
-                            <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
+                            <label class="form-label" for="chapter-names">Chapter Name</label>
+                            <select name="name[]" id="chapter-names" class="form-control select2-multiple" multiple="multiple"></select>
+                            <x-input-error :messages="$errors->get('name.*')" class="mt-2" />
                         </div>
                     </div>
                     <div class="mb-4">
@@ -60,4 +59,24 @@
     $(document).ready(function() {
 $('.js-example-basic-multiple').select2();
 });
+$(document).ready(function() {
+        $('#chapter-select').select2();
+
+        $('#chapter-names').select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: "Enter Chapter Names",
+            createTag: function(params) {
+                var term = $.trim(params.term);
+                if (term === '') {
+                    return null;
+                }
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true // add additional parameters
+                };
+            }
+        });
+    });
 </script>

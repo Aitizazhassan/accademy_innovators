@@ -54,9 +54,9 @@ class ClassRoomController extends Controller
     public function create()
     {
 
-        $pageHead = 'Create Class Room';
-        $pageTitle = 'Create Class Room';
-        $activeMenu = 'create_classroom';
+        $pageHead = 'Create Class';
+        $pageTitle = 'Create Class';
+        $activeMenu = 'create_clas';
 
         $boards = Board::get();
 
@@ -66,35 +66,33 @@ class ClassRoomController extends Controller
 
     public function store(ClassRoomRequest $request)
     {
-
         $validatedData = $request->validate([
-            'name' => 'required|string',
+            'name.*' => 'required|string',
             'board_id' => 'required|array',
         ]);
 
-         // Validate the incoming request data
-         $validatedData = $request->validated();
+        foreach ($validatedData['name'] as $name) {
+            // Check if a topic with the same name already exists
+            $existingTopic = Classroom::where('name', $name)->first();
+            if ($existingTopic) {
+                // If a topic with the same name already exists, return with error message
+                return redirect()->back()->with('error', "A class with the name '{$name}' already exists.");
+            }
 
-         // Check if a session with the same name already exists
-         $existingSession = Classroom::where('name', $validatedData['name'])->first();
+            // Create a new topic instance
+            $classroom = new Classroom();
+            $classroom->name = $name;
+            $classroom->save();
 
-         if ($existingSession) {
-             // If a session with the same name already exists, return with error message
-             return redirect()->back()->with('error', 'A class with the same name already exists.');
-         }
 
-         // Create a new session instance
-         $classroom = new Classroom();
-         $classroom->name = $validatedData['name'];
-         $classroom->save();
+            // Attach chapters to the topic
+            $classroom->boards()->attach($validatedData['board_id']);
+        }
 
-         // Attach campuses to the session
-         $classroom->boards()->attach($validatedData['board_id']);
-
-         // Redirect with success message
-         return redirect()->route('classroom.index')->with('success', 'Class created successfully.');
-
+        // Redirect with success message
+        return redirect()->route('classroom.index')->with('success', 'Class created successfully.');
     }
+
 
 
 
@@ -111,21 +109,21 @@ class ClassRoomController extends Controller
     }
 
     public function update(ClassRoomRequest $request, Classroom $classroom)
-{
-    // Validate the request data
-    $validatedData = $request->validate([
-        'name' => 'required|string',
-        'board_id' => 'required|array',
-    ]);
+    {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'board_id' => 'required|array',
+        ]);
 
-    // Update the classroom's name
-    $classroom->update(['name' => $validatedData['name']]);
+        // Update the classroom's name
+        $classroom->update(['name' => $validatedData['name']]);
 
-    // Sync the associated boards
-    $classroom->boards()->sync($validatedData['board_id']);
+        // Sync the associated boards
+        $classroom->boards()->sync($validatedData['board_id']);
 
-    return redirect()->route('classroom.index')->with('success', 'Classroom updated successfully.');
-}
+        return redirect()->route('classroom.index')->with('success', 'Classroom updated successfully.');
+    }
 
     public function show(Classroom $classroom)
     {

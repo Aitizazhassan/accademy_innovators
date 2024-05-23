@@ -68,8 +68,7 @@ class BoardController extends Controller
 
         $countries  = Country::get();
 
-        return view('boards.create', compact('activeMenu','pageHead','pageTitle','countries'));
-
+        return view('boards.create', compact('activeMenu', 'pageHead', 'pageTitle', 'countries'));
     }
 
 
@@ -77,30 +76,32 @@ class BoardController extends Controller
     {
         // Validate the incoming request data
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
+            'name.*' => 'required|string',
             'country_id' => 'required|array', // Ensure country_id is an array
             'country_id.*' => 'exists:countries,id', // Ensure each country_id exists
         ]);
 
-        // Check if a board with the same name already exists
-        $existingBoard = Board::where('name', $validatedData['name'])->first();
+        foreach ($validatedData['name'] as $name) {
+            // Check if a topic with the same name already exists
+            $existingTopic = Board::where('name', $name)->first();
+            if ($existingTopic) {
+                // If a topic with the same name already exists, return with error message
+                return redirect()->back()->with('error', "A board with the name '{$name}' already exists.");
+            }
 
-        // If a board with the same name already exists, show a message
-        if ($existingBoard) {
-            return redirect()->back()->withInput()->withErrors(['name' => 'This board already exists.']);
+            // Create a new topic instance
+            $board = new Board();
+            $board->name = $name;
+            $board->save();
+
+
+            // Attach chapters to the topic
+            $board->countries()->attach($validatedData['country_id']);
         }
 
-        // Create the board
-        $board = new Board();
-        $board->name = $validatedData['name'];
-        $board->save();
-
-        // Attach the board to the specified countries
-        $board->countries()->attach($validatedData['country_id']);
-
-        // Redirect or return a response as needed
         return redirect()->route('boards.index')->with('success', 'Board created successfully!');
     }
+
 
 
     // public function edit($id)
@@ -117,8 +118,7 @@ class BoardController extends Controller
 
         $countries = Country::get();
 
-        return view('boards.edit', compact('activeMenu','pageHead','pageTitle','board','countries'));
-
+        return view('boards.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'board', 'countries'));
     }
 
     public function update(BoardUpdateRequest $request, Board $board): RedirectResponse

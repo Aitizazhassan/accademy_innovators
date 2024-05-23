@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+
 class SubjectController extends Controller
 {
 
@@ -48,9 +49,7 @@ class SubjectController extends Controller
         $pageHead = 'Subject';
         $pageTitle = 'Subject';
         $activeMenu = 'subject';
-        return view('subject.index', compact('activeMenu','pageHead','pageTitle'));
-
-
+        return view('subject.index', compact('activeMenu', 'pageHead', 'pageTitle'));
     }
 
 
@@ -63,41 +62,36 @@ class SubjectController extends Controller
 
         $classrooms = Classroom::get();
 
-        return view('subject.create', compact('activeMenu','pageHead','pageTitle','classrooms'));
-
+        return view('subject.create', compact('activeMenu', 'pageHead', 'pageTitle', 'classrooms'));
     }
+
 
     public function store(SubjectRequest $request)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string',
+            'name.*' => 'required|string',
             'classroom_id' => 'required|array',
         ]);
 
+        foreach ($validatedData['name'] as $name) {
+            // Check if a topic with the same name already exists
+            $existingTopic = Subject::where('name', $name)->first();
+            if ($existingTopic) {
+                // If a topic with the same name already exists, return with error message
+                return redirect()->back()->with('error', "A Subject with the name '{$name}' already exists.");
+            }
 
-         // Validate the incoming request data
-         $validatedData = $request->validated();
+            // Create a new session instance
+            $subject = new Subject();
+            $subject->name = $name;
+            $subject->save();
+            // Attach campuses to the session
+            $subject->classrooms()->attach($validatedData['classroom_id']);
+        }
 
-         // Check if a session with the same name already exists
-         $existingSession = Subject::where('name', $validatedData['name'])->first();
-
-         if ($existingSession) {
-             // If a session with the same name already exists, return with error message
-             return redirect()->back()->with('error', 'A subject with the same name already exists.');
-         }
-
-         // Create a new session instance
-         $subject = new Subject();
-         $subject->name = $validatedData['name'];
-         $subject->save();
-
-         // Attach campuses to the session
-         $subject->classrooms()->attach($validatedData['classroom_id']);
-
-         // Redirect with success message
-         return redirect()->route('subject.index')->with('success', 'Subject created successfully.');
-
+        return redirect()->route('subject.index')->with('success', 'Subject created successfully.');
     }
+
 
 
 
@@ -110,8 +104,7 @@ class SubjectController extends Controller
 
         $classrooms = Classroom::get();
 
-        return view('subject.edit', compact('activeMenu','pageHead','pageTitle','subject','classrooms'));
-
+        return view('subject.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'subject', 'classrooms'));
     }
 
     public function update(SubjectRequest $request, Subject $subject)
@@ -121,25 +114,23 @@ class SubjectController extends Controller
             'name' => 'required|string',
             'classroom_id' => 'required|array',
         ]);
-         // Validate the incoming request data
-         $validatedData = $request->validated();
+        // Validate the incoming request data
+        $validatedData = $request->validated();
 
-         // Update session name
-         $subject->name = $validatedData['name'];
-         $subject->save();
+        // Update session name
+        $subject->name = $validatedData['name'];
+        $subject->save();
 
-         // Sync campuses for the session
-         $subject->classrooms()->sync($validatedData['classroom_id']);
+        // Sync campuses for the session
+        $subject->classrooms()->sync($validatedData['classroom_id']);
 
         return redirect()->route('subject.index')->with('success', 'Subject updated successfully.');
-
     }
 
     public function show(Subject $subject)
     {
 
         abort(404);
-
     }
 
 
@@ -163,7 +154,4 @@ class SubjectController extends Controller
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     }
-
-
 }
-

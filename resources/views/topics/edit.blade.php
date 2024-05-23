@@ -21,9 +21,9 @@
                 <div class="row push p-sm-2 p-lg-4">
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group">
-                            <label for="chapters">Chapters</label>
+                            <label for="chapters">Chapter Name</label>
                             <select name="chapter_id[]" id="chapters" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
-                                <option value="">Select</option>
+                                <option disabled value="">Select</option>
                                 @foreach ($chapters as $chapter)
                                     <option value="{{ $chapter->id }}" {{ in_array($chapter->id, $topic->chapters->pluck('id')->toArray()) ? 'selected' : '' }}>
                                         {{ $chapter->name }}

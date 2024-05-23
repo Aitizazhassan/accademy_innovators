@@ -21,9 +21,9 @@
                 <div class="row push p-sm-2 p-lg-4">
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group">
-                            <label for="Subject">Subject</label>
+                            <label for="Subject">Subject Name</label>
                             <select name="subject_id[]" id="subject_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
-                            <option value="">Select</option>
+                            <option disabled value="">Select</option>
                                 @forelse ($subjects as $row)
                                     <option value="{{ $row->id }}" {{ in_array($row->id, old('subject_id', $chapter->subjects->pluck('id')->toArray())) ? 'selected' : '' }}>
                                         {{ $row->name }}

@@ -69,37 +69,61 @@ class TopicController extends Controller
 
     }
 
+    // public function store(TopicRequest $request)
+    // {
+
+    //     $validatedData = $request->validate([
+    //         'name' => 'required|string',
+    //         'chapter_id' => 'required|array',
+    //     ]);
+
+
+    //     // Validate the incoming request data
+    //     $validatedData = $request->validated();
+    //     // Check if a session with the same name already exists
+    //     $existingSession = Topic::where('name', $validatedData['name'])->first();
+    //     if ($existingSession) {
+    //         // If a session with the same name already exists, return with error message
+    //         return redirect()->back()->with('error', 'A Topic with the same name already exists.');
+    //     }
+    //     // Create a new session instance
+    //     $chapter = new Topic();
+    //     $chapter->name = $validatedData['name'];
+    //     $chapter->save();
+
+    //     // Attach campuses to the session
+    //     $chapter->chapters()->attach($validatedData['chapter_id']);
+
+    //     return redirect()->route('topic.index')->with('success', 'Topic created successfully.');
+
+    // }
     public function store(TopicRequest $request)
-    {
+{
+    $validatedData = $request->validate([
+        'name.*' => 'required|string',
+        'chapter_id' => 'required|array',
+    ]);
 
-        $validatedData = $request->validate([
-            'name' => 'required|string',
-            'chapter_id' => 'required|array',
-        ]);
-
-
-        // Validate the incoming request data
-        $validatedData = $request->validated();
-
-        // Check if a session with the same name already exists
-        $existingSession = Topic::where('name', $validatedData['name'])->first();
-
-        if ($existingSession) {
-            // If a session with the same name already exists, return with error message
-            return redirect()->back()->with('error', 'A Topic with the same name already exists.');
+    foreach ($validatedData['name'] as $name) {
+        // Check if a topic with the same name already exists
+        $existingTopic = Topic::where('name', $name)->first();
+        if ($existingTopic) {
+            // If a topic with the same name already exists, return with error message
+            return redirect()->back()->with('error', "A Topic with the name '{$name}' already exists.");
         }
 
-        // Create a new session instance
-        $chapter = new Topic();
-        $chapter->name = $validatedData['name'];
-        $chapter->save();
+        // Create a new topic instance
+        $topic = new Topic();
+        $topic->name = $name;
+        $topic->save();
 
-        // Attach campuses to the session
-        $chapter->chapters()->attach($validatedData['chapter_id']);
-
-        return redirect()->route('topic.index')->with('success', 'Topic created successfully.');
-
+        // Attach chapters to the topic
+        $topic->chapters()->attach($validatedData['chapter_id']);
     }
+
+    return redirect()->route('topic.index')->with('success', 'Topics created successfully.');
+}
+
 
 
     public function edit(Topic $topic)
@@ -114,24 +138,24 @@ class TopicController extends Controller
     return view('topics.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'topic', 'chapters'));
 }
 
-    public function update(TopicRequest $request, Chapter $chapter)
+    public function update(TopicRequest $request, Topic $topic)
     {
 
         $validatedData = $request->validate([
             'name' => 'required|string',
-            'subject_id' => 'required|array',
+            'chapter_id' => 'required|array',
         ]);
          // Validate the incoming request data
          $validatedData = $request->validated();
 
          // Update session name
-         $chapter->name = $validatedData['name'];
-         $chapter->save();
+         $topic->name = $validatedData['name'];
+         $topic->save();
 
          // Sync campuses for the session
-         $chapter->subjects()->sync($validatedData['subject_id']);
+         $topic->chapters()->sync($validatedData['chapter_id']);
 
-        return redirect()->route('chapter.index')->with('success', 'Chapter updated successfully.');
+        return redirect()->route('topic.index')->with('success', 'Topic updated successfully.');
 
     }
 

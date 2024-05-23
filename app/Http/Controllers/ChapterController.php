@@ -60,10 +60,7 @@ class ChapterController extends Controller
         $pageHead = 'Chapter';
         $pageTitle = 'Chapter';
         $activeMenu = 'chapter';
-        return view('chapter.index', compact('activeMenu','pageHead','pageTitle'));
-
-
-
+        return view('chapter.index', compact('activeMenu', 'pageHead', 'pageTitle'));
     }
 
     public function create()
@@ -75,41 +72,67 @@ class ChapterController extends Controller
 
         $subjects = Subject::get();
 
-        return view('chapter.create', compact('activeMenu','pageHead','pageTitle','subjects'));
-
+        return view('chapter.create', compact('activeMenu', 'pageHead', 'pageTitle', 'subjects'));
     }
 
+    // public function store(ChapterRequest $request)
+    // {
+
+    //     $validatedData = $request->validate([
+    //         'name' => 'required|string',
+    //         'subject_id' => 'required|array',
+    //     ]);
+
+
+    //     // Validate the incoming request data
+    //     $validatedData = $request->validated();
+
+    //     // Check if a session with the same name already exists
+    //     $existingSession = Chapter::where('name', $validatedData['name'])->first();
+
+    //     if ($existingSession) {
+    //         // If a session with the same name already exists, return with error message
+    //         return redirect()->back()->with('error', 'A chapter with the same name already exists.');
+    //     }
+
+    //     // Create a new session instance
+    //     $chapter = new Chapter();
+    //     $chapter->name = $validatedData['name'];
+    //     $chapter->save();
+
+    //     // Attach campuses to the session
+    //     $chapter->subjects()->attach($validatedData['subject_id']);
+
+    //     return redirect()->route('chapter.index')->with('success', 'Chapter created successfully.');
+
+    // }
     public function store(ChapterRequest $request)
     {
-
         $validatedData = $request->validate([
-            'name' => 'required|string',
+            'name.*' => 'required|string',
             'subject_id' => 'required|array',
         ]);
 
+        foreach ($validatedData['name'] as $name) {
+            // Check if a topic with the same name already exists
+            $existingTopic = Chapter::where('name', $name)->first();
+            if ($existingTopic) {
+                // If a topic with the same name already exists, return with error message
+                return redirect()->back()->with('error', "A Chapter with the name '{$name}' already exists.");
+            }
 
-        // Validate the incoming request data
-        $validatedData = $request->validated();
+            // Create a new topic instance
+            $chapter = new Chapter();
+            $chapter->name =  $name;
+            $chapter->save();
 
-        // Check if a session with the same name already exists
-        $existingSession = Chapter::where('name', $validatedData['name'])->first();
-
-        if ($existingSession) {
-            // If a session with the same name already exists, return with error message
-            return redirect()->back()->with('error', 'A chapter with the same name already exists.');
+            // Attach campuses to the session
+            $chapter->subjects()->attach($validatedData['subject_id']);
         }
 
-        // Create a new session instance
-        $chapter = new Chapter();
-        $chapter->name = $validatedData['name'];
-        $chapter->save();
-
-        // Attach campuses to the session
-        $chapter->subjects()->attach($validatedData['subject_id']);
-
         return redirect()->route('chapter.index')->with('success', 'Chapter created successfully.');
-
     }
+
 
 
     public function edit(Chapter $chapter)
@@ -121,8 +144,7 @@ class ChapterController extends Controller
 
         $subjects = Subject::get();
 
-        return view('chapter.edit', compact('activeMenu','pageHead','pageTitle','chapter','subjects'));
-
+        return view('chapter.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'chapter', 'subjects'));
     }
 
     public function update(ChapterRequest $request, Chapter $chapter)
@@ -132,25 +154,23 @@ class ChapterController extends Controller
             'name' => 'required|string',
             'subject_id' => 'required|array',
         ]);
-         // Validate the incoming request data
-         $validatedData = $request->validated();
+        // Validate the incoming request data
+        $validatedData = $request->validated();
 
-         // Update session name
-         $chapter->name = $validatedData['name'];
-         $chapter->save();
+        // Update session name
+        $chapter->name = $validatedData['name'];
+        $chapter->save();
 
-         // Sync campuses for the session
-         $chapter->subjects()->sync($validatedData['subject_id']);
+        // Sync campuses for the session
+        $chapter->subjects()->sync($validatedData['subject_id']);
 
         return redirect()->route('chapter.index')->with('success', 'Chapter updated successfully.');
-
     }
 
     public function show(Chapter $chapter)
     {
 
         abort(404);
-
     }
 
 
@@ -175,7 +195,4 @@ class ChapterController extends Controller
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     }
-
-
 }
-

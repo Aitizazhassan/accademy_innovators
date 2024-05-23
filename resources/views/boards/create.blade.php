@@ -1,10 +1,10 @@
 <x-app-layout>
-    @section('title', 'Boards User')
+    @section('title', 'Create Boards')
     <!-- Hero -->
     <div class="bg-body-light">
         <div class="content content-full">
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-grow-1 fs-3 fw-semibold my-2 my-sm-3">Boards User</h1>
+                <h1 class="flex-grow-1 fs-3 fw-semibold my-2 my-sm-3">Create Boards </h1>
                 <x-breadcrumbs />
             </div>
         </div>
@@ -27,7 +27,7 @@
                                 <option value="">Select</option>
                                 @forelse ($countries as $country)
                                     <!-- Corrected variable name -->
-                                    <option value="{{ $country->id }}"
+                                    <option  value="{{ $country->id }}"
                                         {{ collect(old('country_id'))->contains($country->id) ? 'selected' : '' }}>
                                         {{ $country->name }}
                                     </option>
@@ -38,12 +38,20 @@
                             <x-input-error :messages="$errors->get('country_id')" class="mt-2" />
                         </div>
                     </div>
-                    <div class="col-xl-6 order-xl-0">
+                    {{-- <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="profile-edit-name">Board Name</label>
                             <input type="text" name="name" value="{{ old('name') }}" autocomplete="name"
                                 class="form-control form-control-sm" id="profile-edit-name" placeholder="Enter Name">
                             <x-input-error :messages="$errors->get('name')" class="mt-2" /> <!-- Corrected component name -->
+                        </div>
+                    </div> --}}
+                    <div class="col-xl-6 order-xl-0">
+                        <div class="mb-4">
+                            <label class="form-label" for="board-name">Board Name</label>
+                            <select name="name[]" id="board-name" class="form-control select2-multiple" multiple="multiple"></select>
+                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+
                         </div>
                     </div>
 
@@ -65,5 +73,25 @@
 <script>
     $(document).ready(function() {
         $('.js-example-basic-multiple').select2();
+    });
+    $(document).ready(function() {
+        $('#chapter-select').select2();
+
+        $('#board-name').select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: "Enter Board Name",
+            createTag: function(params) {
+                var term = $.trim(params.term);
+                if (term === '') {
+                    return null;
+                }
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true // add additional parameters
+                };
+            }
+        });
     });
 </script>

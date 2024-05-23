@@ -24,7 +24,7 @@
                         <div class="mb-4">
                             <label class="form-label" for="country_id">Country</label>
                             <select name="country_id[]" id="country_id" class="form-control form-control-sm select2 js-example-basic-multiple" multiple="multiple">
-                                <option value="">Select</option>
+                                <option disabled value="">Select</option>
                                 @forelse ($countries as $country)
                                     <option value="{{ $country->id }}" {{ in_array($country->id, old('country_id', $board->countries->pluck('id')->toArray())) ? 'selected' : '' }}>
                                         {{ $country->name }}
@@ -43,12 +43,13 @@
                             <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
                     </div>
-                </div>
+
                 <div class="mb-4">
                     <button type="submit" class="btn btn-alt-primary">
                         <i class="fa fa-check-circle opacity-50 me-1"></i> Update
                     </button>
                 </div>
+            </div>
             </form>
 
 

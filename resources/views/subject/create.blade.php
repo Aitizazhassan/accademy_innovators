@@ -21,11 +21,14 @@
                 <div class="row push p-sm-2 p-lg-4">
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="profile-edit-name">Classroom</label>
-                            <select name="classroom_id[]" id="classroom_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
-                                <option value="">Select Classroom</option>
+                            <label class="form-label" for="profile-edit-name">Class Name</label>
+                            <select name="classroom_id[]" id="classroom_id"
+                                class="form-control form-contol-sm select2 js-example-basic-multiple"
+                                multiple="multiple">
+                                <option disabled="">Select Class</option>
                                 @forelse ($classrooms as $row)
-                                    <option value="{{ $row->id }}" {{ in_array($row->id, (array)old('classroom_id', [])) ? 'selected' : '' }}>
+                                    <option value="{{ $row->id }}"
+                                        {{ in_array($row->id, (array) old('classroom_id', [])) ? 'selected' : '' }}>
                                         {{ $row->name }}
                                     </option>
                                 @empty
@@ -38,10 +41,10 @@
                     </div>
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="profile-edit-name">Subject Name</label>
-                            <input type="text" name="name" value="{{ old('name') }}" autocomplete="name"
-                                class="form-control form-contol-sm select2" id="profile-edit-name" placeholder="Enter Name">
-                            <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
+                            <label class="form-label" for="subject-names">Subject Names</label>
+                            <select name="name[]" id="subject-names" class="form-control select2-multiple"
+                                multiple="multiple"></select>
+                            <x-input-error :messages="$errors->get('name.*')" class="mt-2" />
                         </div>
                     </div>
                     <div class="mb-4">
@@ -61,6 +64,26 @@
 </x-app-layout>
 <script>
     $(document).ready(function() {
-$('.js-example-basic-multiple').select2();
-});
+        $('.js-example-basic-multiple').select2();
+    });
+    $(document).ready(function() {
+        $('#subject-select').select2();
+
+        $('#subject-names').select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: "Enter Subject Name",
+            createTag: function(params) {
+                var term = $.trim(params.term);
+                if (term === '') {
+                    return null;
+                }
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true // add additional parameters
+                };
+            }
+        });
+    });
 </script>

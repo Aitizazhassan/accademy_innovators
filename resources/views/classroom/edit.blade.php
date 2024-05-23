@@ -1,10 +1,10 @@
 <x-app-layout>
-    @section('title', 'ClassRoom Edit')
+    @section('title', 'Class Edit')
     <!-- Hero -->
     <div class="bg-body-light">
         <div class="content content-full">
             <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
-                <h1 class="flex-grow-1 fs-3 fw-semibold my-2 my-sm-3">ClassRoom </h1>
+                <h1 class="flex-grow-1 fs-3 fw-semibold my-2 my-sm-3">Class </h1>
                 <x-breadcrumbs />
             </div>
         </div>
@@ -24,7 +24,7 @@
                                     <label class="form-label" for="profile-edit-name">Board Name</label>
                                     <select name="board_id[]" id="board_id"
                                         class="form-control form-contol-sm select2 js-example-basic-multiple" multiple>
-                                        <option value="">Select</option>
+                                        <option  disabled value="">Select</option>
                                         @forelse ($boards as $data)
                                         <option value="{{ $data->id }}"
                                             @if(in_array($data->id, old('board_id', $classroom->boards->pluck('id')->toArray())))
@@ -34,8 +34,6 @@
                                             <option value="">No sessions found</option>
                                         @endforelse
                                     </select>
-
-
                                     <x-input-error :messages="$errors->get('borad_id')" class="mt-2" />
                                 </div>
                             </div>

@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Create Class Rooms')
+    @section('title', 'Create Class')
     <!-- Hero -->
     <div class="bg-body-light">
         <div class="content content-full">
@@ -22,10 +22,13 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="profile-edit-name">Board Name</label>
-                            <select name="board_id[]" id="board_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
-                                <option value="">Select Board</option>
+                            <select name="board_id[]" id="board_id"
+                                class="form-control form-contol-sm select2 js-example-basic-multiple"
+                                multiple="multiple">
+                                <option disabled value="">Select Board</option>
                                 @forelse ($boards as $row)
-                                    <option value="{{ $row->id }}" {{ in_array($row->id, (array)old('board_id', [])) ? 'selected' : '' }}>
+                                    <option value="{{ $row->id }}"
+                                        {{ in_array($row->id, (array) old('board_id', [])) ? 'selected' : '' }}>
                                         {{ $row->name }}
                                     </option>
                                 @empty
@@ -37,12 +40,12 @@
                             <x-input-error :messages="$errors->get('borad_id')" class="mt-2" />
                         </div>
                     </div>
+
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="profile-edit-name">Class Name</label>
-                            <input type="text" name="name" value="{{ old('name') }}" autocomplete="name"
-                                class="form-control form-contol-sm select2" id="profile-edit-name" placeholder="Enter Name">
-                            <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
+                            <label class="form-label" for="class-name">Class Name</label>
+                            <select name="name[]" id="class-name" class="form-control select2-multiple" multiple="multiple"></select>
+                            <x-input-error :messages="$errors->get('name.*')" class="mt-2" />
                         </div>
                     </div>
                     <div class="mb-4">
@@ -62,6 +65,26 @@
 </x-app-layout>
 <script>
     $(document).ready(function() {
-$('.js-example-basic-multiple').select2();
-});
+        $('.js-example-basic-multiple').select2();
+    });
+    $(document).ready(function() {
+        $('#class-select').select2();
+
+        $('#class-name').select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: "Enter Class Name",
+            createTag: function(params) {
+                var term = $.trim(params.term);
+                if (term === '') {
+                    return null;
+                }
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true // add additional parameters
+                };
+            }
+        });
+    });
 </script>
