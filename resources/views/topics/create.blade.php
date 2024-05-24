@@ -69,7 +69,7 @@
 
         $('#topic-names').select2({
             tags: true,
-            tokenSeparators: [',', ' '],
+            tokenSeparators: [','],
             placeholder: "Enter Topic Names",
             createTag: function(params) {
                 var term = $.trim(params.term);

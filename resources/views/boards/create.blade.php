@@ -79,7 +79,7 @@
 
         $('#board-name').select2({
             tags: true,
-            tokenSeparators: [',', ' '],
+            tokenSeparators: [','],
             placeholder: "Enter Board Name",
             createTag: function(params) {
                 var term = $.trim(params.term);
@@ -89,7 +89,7 @@
                 return {
                     id: term,
                     text: term,
-                    newTag: true // add additional parameters
+                    newTag: true
                 };
             }
         });

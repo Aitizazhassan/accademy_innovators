@@ -64,7 +64,7 @@ $(document).ready(function() {
 
         $('#chapter-names').select2({
             tags: true,
-            tokenSeparators: [',', ' '],
+            tokenSeparators: [','],
             placeholder: "Enter Chapter Names",
             createTag: function(params) {
                 var term = $.trim(params.term);

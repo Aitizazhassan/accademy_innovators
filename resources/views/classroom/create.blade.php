@@ -72,7 +72,7 @@
 
         $('#class-name').select2({
             tags: true,
-            tokenSeparators: [',', ' '],
+            tokenSeparators: [','],
             placeholder: "Enter Class Name",
             createTag: function(params) {
                 var term = $.trim(params.term);
