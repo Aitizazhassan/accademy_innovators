@@ -27,14 +27,22 @@ class BoardController extends Controller
     {
         if ($request->ajax()) {
             $currentUserId = Auth::id();
-            $boards = Board::select(['id', 'name', 'created_at'])->where('id', '!=', $currentUserId);
-
+            $boards = Board::with('countries')->orderBy('id', 'desc');
             return Datatables::of($boards)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
-                    // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
+                })
+                ->addColumn('board_countries', function ($row) {
+                    $countries = '';
+                    if($row->countries){
+                        foreach($row->countries as $country)
+                        {
+                            $countries .= '<span class="badge bg-primary">'.$country->name.'</span>&nbsp;';
+                        }
+                    }
+                    return $countries;
                 })
 
                 ->addColumn('actions', function ($row) {
@@ -52,7 +60,7 @@ class BoardController extends Controller
 
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'board_countries', 'actions'])
                 ->make(true);
         }
 

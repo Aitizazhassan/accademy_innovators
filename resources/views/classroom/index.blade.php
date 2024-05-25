@@ -30,6 +30,7 @@
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 80px;">{{ __('#') }}</th>
+                                <th style="width:50%">{{ __('Boards') }}</th>
                                 <th>{{ __('Class Name') }}</th>
                                 <th>{{ __('Date') }}</th>
                                 <th>{{ __('Actions') }}</th>
@@ -87,6 +88,10 @@
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
+                    },
+                    {
+                        data: 'class_boards',
+                        name: 'class_boards'
                     },
                     {
                         data: 'name',

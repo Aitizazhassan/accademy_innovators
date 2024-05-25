@@ -18,7 +18,7 @@ class SubjectController extends Controller
     {
         if ($request->ajax()) {
             $currentUserId = Auth::id();
-            $subject = Subject::select(['id', 'name', 'created_at']);
+            $subject = Subject::with('classrooms');
 
             return Datatables::of($subject)
                 ->addIndexColumn()
@@ -26,6 +26,16 @@ class SubjectController extends Controller
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
                     // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
+                })
+                ->addColumn('subject_classrooms', function ($row) {
+                    $classrooms = '';
+                    if($row->classrooms){
+                        foreach($row->classrooms as $classroom)
+                        {
+                            $classrooms .= '<span class="badge bg-primary">'.$classroom->name.'</span>&nbsp;';
+                        }
+                    }
+                    return $classrooms;
                 })
 
                 ->addColumn('actions', function ($row) {
@@ -43,7 +53,7 @@ class SubjectController extends Controller
 
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'subject_classrooms', 'actions'])
                 ->make(true);
         }
         $pageHead = 'Subject';

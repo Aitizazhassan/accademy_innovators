@@ -30,13 +30,23 @@ class ChapterController extends Controller
         if ($request->ajax()) {
             $currentUserId = Auth::id();
             //$classroom = Classroom::select(['id', 'name', 'created_at']);
-            $classroom = Chapter::with('subject')->get();
+            $classroom = Chapter::with('subject', 'subjects')->get();
             return Datatables::of($classroom)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
                     // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
+                })
+                ->addColumn('chapter_subjects', function ($row) {
+                    $subjects = '';
+                    if($row->subjects){
+                        foreach($row->subjects as $subject)
+                        {
+                            $subjects .= '<span class="badge bg-primary">'.$subject->name.'</span>&nbsp;';
+                        }
+                    }
+                    return $subjects;
                 })
 
                 ->addColumn('actions', function ($row) {
@@ -54,7 +64,7 @@ class ChapterController extends Controller
 
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'chapter_subjects', 'actions'])
                 ->make(true);
         }
         $pageHead = 'Chapter';

@@ -29,13 +29,23 @@ class TopicController extends Controller
         if ($request->ajax()) {
             $currentUserId = Auth::id();
             //$classroom = Classroom::select(['id', 'name', 'created_at']);
-            $classroom = Topic::get();
+            $classroom = Topic::with('chapters');
             return Datatables::of($classroom)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
                     // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
+                })
+                ->addColumn('topic_chapters', function ($row) {
+                    $chapters = '';
+                    if($row->chapters){
+                        foreach($row->chapters as $chapter)
+                        {
+                            $chapters .= '<span class="badge bg-primary">'.$chapter->name.'</span>&nbsp;';
+                        }
+                    }
+                    return $chapters;
                 })
                 ->addColumn('actions', function ($row) {
                     $settingsButton = '<a href="' . route('topic.edit', $row->id) . '" class="btn btn-sm btn-alt-secondary" data-bs-toggle="tooltip" title="Edit">
@@ -48,7 +58,7 @@ class TopicController extends Controller
                     $deleteButton = Gate::check('user.delete') ? $deleteButton : '';
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'topic_chapters', 'actions'])
                 ->make(true);
         }
         $pageHead = 'Topic';

@@ -26,6 +26,7 @@
                     <thead>
                         <tr>
                             <th class="text-center" style="width: 80px;">#</th>
+                            <th style="width:50%">Countries</th>
                             <th>Name</th>
                             <th>Date</th>
                             <th>Actions</th>
@@ -55,6 +56,10 @@
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
+                    },
+                    {
+                        data: 'board_countries',
+                        name: 'board_countries',
                     },
                     {
                         data: 'name',

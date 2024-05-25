@@ -18,7 +18,7 @@ class ClassRoomController extends Controller
     {
         if ($request->ajax()) {
             $currentUserId = Auth::id();
-            $classroom = Classroom::select(['id', 'name', 'created_at']);
+            $classroom = Classroom::with('boards');
 
             return Datatables::of($classroom)
                 ->addIndexColumn()
@@ -26,6 +26,17 @@ class ClassRoomController extends Controller
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
                     // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
+                })
+                
+                ->addColumn('class_boards', function ($row) {
+                    $boards = '';
+                    if($row->boards)
+                        foreach($row->boards as $board)
+                        {
+                            $boards .= '<span class="badge bg-primary">'.$board->name.'</span>&nbsp;';
+                        }
+                    }
+                    return $boards;
                 })
 
                 ->addColumn('actions', function ($row) {
@@ -43,7 +54,7 @@ class ClassRoomController extends Controller
 
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'class_boards', 'actions'])
                 ->make(true);
         }
 
