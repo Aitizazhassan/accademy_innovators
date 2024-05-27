@@ -30,9 +30,12 @@
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 80px;">{{ __('#') }}</th>
-                                <th style="width:50%">{{ __('Subjects') }}</th>
-                                <th>{{ __('Name') }}</th>
-                                <th>{{ __('Date') }}</th>
+                                <th>{{ __('Countries') }}</th>
+                                <th>{{ __('Boards') }}</th>
+                                <th>{{ __('Classrooms') }}</th>
+                                <th>{{ __('Subjects') }}</th>
+                                <th style="width:10%">{{ __('Name') }}</th>
+                                <th style="width:15%">{{ __('Date') }}</th>
                                 <th>{{ __('Actions') }}</th>
                             </tr>
                         </thead>
@@ -88,6 +91,18 @@
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
+                    },
+                    {
+                        data: 'chapter_countries',
+                        name: 'chapter_countries'
+                    },
+                    {
+                        data: 'chapter_boards',
+                        name: 'chapter_boards'
+                    },
+                    {
+                        data: 'chapter_classrooms',
+                        name: 'chapter_classrooms'
                     },
                     {
                         data: 'chapter_subjects',

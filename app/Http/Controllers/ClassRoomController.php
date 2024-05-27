@@ -18,19 +18,35 @@ class ClassRoomController extends Controller
     {
         if ($request->ajax()) {
             $currentUserId = Auth::id();
-            $classroom = Classroom::with('boards');
+            $classroom = Classroom::with('boards', 'boards.countries');
 
             return Datatables::of($classroom)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
-                    // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
                 })
-                
+                ->addColumn('class_countries', function ($row) {
+                    $countries = '';
+                    $addedCountries = []; 
+                    if ($row->boards) {
+                        foreach ($row->boards as $board) {
+                            if ($board->countries) {
+                                foreach ($board->countries as $country) {
+                                    if (!in_array($country->name, $addedCountries)) {
+                                        $countries .= '<span class="badge bg-primary">' . $country->name . '</span>&nbsp;';
+                                        $addedCountries[] = $country->name;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return $countries;
+                })
                 ->addColumn('class_boards', function ($row) {
                     $boards = '';
                     if($row->boards)
+                    {
                         foreach($row->boards as $board)
                         {
                             $boards .= '<span class="badge bg-primary">'.$board->name.'</span>&nbsp;';
@@ -54,7 +70,7 @@ class ClassRoomController extends Controller
 
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'class_boards', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'class_countries', 'class_boards', 'actions'])
                 ->make(true);
         }
 

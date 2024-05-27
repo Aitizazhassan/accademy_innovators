@@ -30,20 +30,85 @@ class ChapterController extends Controller
         if ($request->ajax()) {
             $currentUserId = Auth::id();
             //$classroom = Classroom::select(['id', 'name', 'created_at']);
-            $classroom = Chapter::with('subject', 'subjects')->get();
-            return Datatables::of($classroom)
+            $chapters = Chapter::with('subject', 'subjects', 'subjects.classrooms', 'subjects.classrooms.boards', 'subjects.classrooms.boards.countries');
+            return Datatables::of($chapters)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
                     // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
                 })
+                ->addColumn('chapter_countries', function ($row) {
+                    $countries = '';
+                    $addedCountries = []; 
+                    
+                    if ($row->subjects) {
+                        foreach ($row->subjects as $subject) {
+                            if ($subject->classrooms) {
+                                foreach ($subject->classrooms as $classroom) {
+                                    if ($classroom->boards) {
+                                        foreach ($classroom->boards as $board) {
+                                            if ($board->countries) {
+                                                foreach ($board->countries as $country) {
+                                                    if (!in_array($country->name, $addedCountries)) {
+                                                        $countries .= '<span class="badge bg-primary">' . $country->name . '</span>&nbsp;';
+                                                        $addedCountries[] = $country->name;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return $countries;
+                })
+                ->addColumn('chapter_boards', function ($row) {
+                    $boards = '';
+                    $addedBoards = [];
+                    
+                    if ($row->subjects) {
+                        foreach ($row->subjects as $subject) {
+                            if ($subject->classrooms) {
+                                foreach ($subject->classrooms as $classroom) {
+                                    if ($classroom->boards) {
+                                        foreach ($classroom->boards as $board) {
+                                            if (!in_array($board->name, $addedBoards)) {
+                                                $boards .= '<span class="badge bg-primary">' . $board->name . '</span>&nbsp;';
+                                                $addedBoards[] = $board->name;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return $boards;
+                })
+                ->addColumn('chapter_classrooms', function ($row) {
+                    $classrooms = '';
+                    $addedClassrooms = []; 
+                    
+                    if ($row->subjects) {
+                        foreach ($row->subjects as $subject) {
+                            if ($subject->classrooms) {
+                                foreach ($subject->classrooms as $classroom) {
+                                    if (!in_array($classroom->name, $addedClassrooms)) {
+                                        $classrooms .= '<span class="badge bg-primary">' . $classroom->name . '</span>&nbsp;';
+                                        $addedClassrooms[] = $classroom->name;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return $classrooms;
+                })
                 ->addColumn('chapter_subjects', function ($row) {
                     $subjects = '';
-                    if($row->subjects){
-                        foreach($row->subjects as $subject)
-                        {
-                            $subjects .= '<span class="badge bg-primary">'.$subject->name.'</span>&nbsp;';
+                    if ($row->subjects) {
+                        foreach ($row->subjects as $subject) {
+                            $subjects .= '<span class="badge bg-primary">' . $subject->name . '</span>&nbsp;';
                         }
                     }
                     return $subjects;
@@ -64,7 +129,7 @@ class ChapterController extends Controller
 
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'chapter_subjects', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'chapter_countries', 'chapter_boards', 'chapter_classrooms', 'chapter_subjects', 'actions'])
                 ->make(true);
         }
         $pageHead = 'Chapter';

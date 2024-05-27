@@ -18,14 +18,51 @@ class SubjectController extends Controller
     {
         if ($request->ajax()) {
             $currentUserId = Auth::id();
-            $subject = Subject::with('classrooms');
+            $subject = Subject::with('classrooms', 'classrooms.boards', 'classrooms.boards.countries');
 
             return Datatables::of($subject)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
                     $dateAdded = \Carbon\Carbon::parse($row->created_at);
                     return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
-                    // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
+                })
+                ->addColumn('subject_countries', function ($row) {
+                    $countries = '';
+                    $addedCountries = []; 
+                    if ($row->classrooms) {
+                        foreach ($row->classrooms as $classroom) {
+                            if ($classroom->boards) {
+                                foreach ($classroom->boards as $board) {
+                                    if ($board->countries) {
+                                        foreach ($board->countries as $country) {
+                                            if (!in_array($country->name, $addedCountries)) {
+                                                $countries .= '<span class="badge bg-primary">' . $country->name . '</span>&nbsp;';
+                                                $addedCountries[] = $country->name;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return $countries;
+                })
+                ->addColumn('subject_boards', function ($row) {
+                    $boards = '';
+                    $addedBoards = []; 
+                    if ($row->classrooms) {
+                        foreach ($row->classrooms as $classroom) {
+                            if ($classroom->boards) {
+                                foreach ($classroom->boards as $board) {
+                                    if (!in_array($board->name, $addedBoards)) {
+                                        $boards .= '<span class="badge bg-primary">' . $board->name . '</span>&nbsp;';
+                                        $addedBoards[] = $board->name;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return $boards;
                 })
                 ->addColumn('subject_classrooms', function ($row) {
                     $classrooms = '';
@@ -53,7 +90,7 @@ class SubjectController extends Controller
 
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'subject_classrooms', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'subject_boards', 'subject_countries', 'subject_classrooms', 'actions'])
                 ->make(true);
         }
         $pageHead = 'Subject';
