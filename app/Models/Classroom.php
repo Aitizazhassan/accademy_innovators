@@ -19,14 +19,22 @@ class Classroom extends Model
 
     ];
 
-    public function boards()
-    {
-        return $this->belongsToMany(Board::class);
-    }
+    // public function boards()
+    // {
+    //     return $this->belongsToMany(Board::class);
+    // }
 
     public function subjects()
     {
         return $this->belongsToMany(Subject::class);
     }
 
+    public function board()
+    {
+        return $this->belongsTo(Board::class);
+    }
+    public function boards()
+    {
+        return $this->belongsToMany(Board::class, 'board_classroom', 'classroom_id', 'board_id');
+    }
 }

@@ -19,4 +19,9 @@ class Board extends Model
         return $this->belongsToMany(Country::class);
     }
 
+    public function classes()
+    {
+        return $this->hasMany(Classroom::class);
+    }
+
 }

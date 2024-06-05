@@ -132,6 +132,13 @@
                 </a>
             </li>
             @endcan
+            @can('user.view')
+            <li class="nav-main-item">
+                <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['mcqs.index']) ? 'active' : '' }}" href="{{ route('mcqs.index') }}">
+                    <i class="nav-main-link-icon fa fa-pen"></i><span class="nav-main-link-name">MCQs </span>
+                </a>
+            </li>
+            @endcan
         </ul>
         </div>
         <!-- END Side Navigation -->

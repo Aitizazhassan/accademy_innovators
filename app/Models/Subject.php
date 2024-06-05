@@ -46,9 +46,19 @@ class Subject extends Model
         return $this->belongsToMany(Classroom::class);
     }
 
+    // public function chapters()
+    // {
+    //     return $this->belongsToMany(Chapter::class, 'chapter_subject', 'subject_id', 'chapter_id');
+    // }
+
+    public function class()
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
     public function chapters()
     {
-        return $this->belongsToMany(Chapter::class, 'chapter_subject', 'subject_id', 'chapter_id');
+        return $this->hasMany(Chapter::class);
     }
 
 }

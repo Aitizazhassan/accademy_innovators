@@ -21,6 +21,7 @@ use App\Http\Controllers\ClassRoomController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\MCQsController;
 use App\Http\Controllers\CountryController;
 
 /*
@@ -92,6 +93,13 @@ Route::middleware('auth')->group(function () {
 
         // chapter
         Route::resource('topic', TopicController::class);
+        Route::resource('mcqs', MCQsController::class);
+
+        Route::get('/classes/{board_id}', [MCQsController::class, 'getClass'])->name('getClass');
+        Route::get('/subjects/{class_id}', [MCQsController::class, 'getSubjects'])->name('getSubjects');
+        Route::get('/chapters/{subject_id}', [MCQsController::class, 'getChapters'])->name('getChapters');
+        Route::get('/topics/{chapter_id}', [MCQsController::class, 'getTopics'])->name('getTopics');
+
     });
 });
 

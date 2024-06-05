@@ -40,4 +40,13 @@ class Chapter extends Model
    {
        return $this->belongsToMany(Topic::class, 'topic_chapter', 'chapter_id', 'topic_id');
    }
+
+//    public function topics()
+//     {
+//         return $this->hasMany(Topic::class);
+//     }
+//     public function topics()
+// {
+//     return $this->belongsToMany(Topic::class, 'topic_chapter', 'chapter_id', 'topic_id');
+// }
 }
