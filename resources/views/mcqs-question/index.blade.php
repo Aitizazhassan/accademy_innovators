@@ -145,35 +145,35 @@
                         data: 'statement',
                         name: 'statement',
                         render: function(data, type, row) {
-                            return `<button class="btn btn-info btn-sm view-statement" data-id="${row.id}" data-statement="${data}">View</button>`;
+                            return `<button class="btn btn-sm btn-info-alt view-statement" data-id="${row.id}" data-statement="${data}"  data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
                         }
                     },
                     {
                         data: 'optionA',
                         name: 'optionA',
                         render: function(data, type, row) {
-                            return `<button class="btn btn-info btn-sm view-option" data-id="${row.id}" data-option="A" data-content="${data}">View</button>`;
+                            return `<button class="btn btn-sm btn-info-alt view-option" data-id="${row.id}" data-option="A" data-content="${data}" data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
                         }
                     },
                     {
                         data: 'optionB',
                         name: 'optionB',
                         render: function(data, type, row) {
-                            return `<button class="btn btn-info btn-sm view-option" data-id="${row.id}" data-option="B" data-content="${data}">View</button>`;
+                            return `<button class="btn btn-sm btn-info-alt view-option" data-id="${row.id}" data-option="B" data-content="${data}" data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
                         }
                     },
                     {
                         data: 'optionC',
                         name: 'optionC',
                         render: function(data, type, row) {
-                            return `<button class="btn btn-info btn-sm view-option" data-id="${row.id}" data-option="C" data-content="${data}">View</button>`;
+                            return `<button class="btn btn-sm btn-info-alt view-option" data-id="${row.id}" data-option="C" data-content="${data}" data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
                         }
                     },
                     {
                         data: 'optionD',
                         name: 'optionD',
                         render: function(data, type, row) {
-                            return `<button class="btn btn-info btn-sm view-option" data-id="${row.id}" data-option="D" data-content="${data}">View</button>`;
+                            return `<button class="btn btn-sm btn-info-alt view-option" data-id="${row.id}" data-option="D" data-content="${data}" data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
                         }
                     },
                     {

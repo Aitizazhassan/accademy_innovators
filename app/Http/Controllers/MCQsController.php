@@ -2,18 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\McqsRequest;
 use App\Models\MCQs;
 use App\Models\Board;
-use App\Models\Classroom;
+use App\Models\Topic;
 use App\Models\Chapter;
 use App\Models\Subject;
-use App\Models\Topic;
+use App\Models\Classroom;
 use Illuminate\Http\Request;
+use App\Http\Requests\McqsRequest;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use PhpOffice\PhpPresentation\IOFactory;
+
+use Yajra\DataTables\Facades\DataTables;
+use PhpOffice\PhpPresentation\Style\Font;
+use PhpOffice\PhpPresentation\Style\Color;
+use PhpOffice\PhpPresentation\PhpPresentation;
+use PhpOffice\PhpPresentation\Style\Alignment;
+use PhpOffice\PhpPresentation\Slide\SlideLayout;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MCQsController extends Controller
 {
@@ -28,63 +36,63 @@ class MCQsController extends Controller
     // }
 
     public function index(Request $request)
-{
-    if ($request->ajax()) {
-        $data = MCQs::with(['board', 'class', 'subject', 'chapter', 'topic'])->get();
+    {
+        if ($request->ajax()) {
+            $data = MCQs::with(['board', 'class', 'subject', 'chapter', 'topic'])->get();
 
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('board_name', function($row){
-                return $row->board->name;
-            })
-            ->addColumn('class_name', function($row){
-                return $row->class->name;
-            })
-            ->addColumn('subject_name', function($row){
-                return $row->subject->name;
-            })
-            ->addColumn('chapter_name', function($row){
-                return $row->chapter->name;
-            })
-            ->addColumn('topic_name', function($row){
-                return $row->topic->name;
-            })
-            ->addColumn('statement', function($row){
-                return $row->statement;
-            })
-            ->addColumn('optionA', function($row){
-                return $row->optionA;
-            })
-            ->addColumn('optionB', function($row){
-                return $row->optionB;
-            })
-            ->addColumn('optionC', function($row){
-                return $row->optionC;
-            })
-            ->addColumn('optionD', function($row){
-                return $row->optionD;
-            })
-            ->addColumn('solution_link_english', function($row){
-                return $row->solution_link_english;
-            })
-            ->addColumn('solution_link_urdu', function($row){
-                return $row->solution_link_urdu;
-            })
-            ->addColumn('dateAdded', function($row){
-                return $row->created_at->format('Y-m-d');
-            })
-            ->addColumn('actions', function($row){
-                return view('partials.action-buttons', compact('row'))->render();
-            })
-            ->rawColumns(['actions'])
-            ->make(true);
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('board_name', function ($row) {
+                    return $row->board->name;
+                })
+                ->addColumn('class_name', function ($row) {
+                    return $row->class->name;
+                })
+                ->addColumn('subject_name', function ($row) {
+                    return $row->subject->name;
+                })
+                ->addColumn('chapter_name', function ($row) {
+                    return $row->chapter->name;
+                })
+                ->addColumn('topic_name', function ($row) {
+                    return $row->topic->name;
+                })
+                ->addColumn('statement', function ($row) {
+                    return $row->statement;
+                })
+                ->addColumn('optionA', function ($row) {
+                    return $row->optionA;
+                })
+                ->addColumn('optionB', function ($row) {
+                    return $row->optionB;
+                })
+                ->addColumn('optionC', function ($row) {
+                    return $row->optionC;
+                })
+                ->addColumn('optionD', function ($row) {
+                    return $row->optionD;
+                })
+                ->addColumn('solution_link_english', function ($row) {
+                    return $row->solution_link_english;
+                })
+                ->addColumn('solution_link_urdu', function ($row) {
+                    return $row->solution_link_urdu;
+                })
+                ->addColumn('dateAdded', function ($row) {
+                    return $row->created_at->format('Y-m-d');
+                })
+                ->addColumn('actions', function ($row) {
+                    return view('partials.action-buttons', compact('row'))->render();
+                })
+                ->rawColumns(['actions'])
+                ->make(true);
+        }
+
+        $pageHead = 'MCQs';
+        $pageTitle = 'MCQs';
+        $activeMenu = 'MCQs';
+        return view('mcqs-question.index', compact('activeMenu', 'pageHead', 'pageTitle'));
     }
-
-    $pageHead = 'MCQs';
-    $pageTitle = 'MCQs';
-    $activeMenu = 'MCQs';
-    return view('mcqs-question.index', compact('activeMenu', 'pageHead', 'pageTitle'));
-}
 
     public function create()
     {
@@ -230,9 +238,208 @@ class MCQsController extends Controller
         } catch (ModelNotFoundException $ex) {
             // If the board doesn't exist, return a 404 Not Found response
             return response()->json(['error' => 'MCQs not found'], 404);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             // Return a 500 Internal Server Error response if an error occurs
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     }
+
+    public function downloadSingleMcqAsPptx($id)
+    {
+        $mcq = Mcqs::findOrFail($id);
+
+        // Create a new PHPPresentation object
+        $objPHPPresentation = new PhpPresentation();
+
+        // Remove the default slide
+        $objPHPPresentation->removeSlideByIndex(0);
+
+        // Create a new slide
+        $customWidth = 13.33 * 9525;
+        $currentSlide = $objPHPPresentation->createSlide();
+
+        // **Set Slide Layout (optional)**
+        // Uncomment the line below to set the desired layout
+        // $currentSlide->setLayout(SlideLayout::LAYOUT_BLANK); // Change LAYOUT_TITLE_BODY to your desired layout
+
+        // **Set Slide Background (optional)**
+        // Uncomment the section below to set a background image
+        // $imagePath = 'path/to/your/image.jpg';
+        // $backgroundImage = $currentSlide->createDrawingShape();
+        // $backgroundImage->setPath($imagePath);
+        // $backgroundImage->setWidth(960); // Adjust width as needed
+        // $backgroundImage->setHeight(720); // Adjust height as needed
+        // $backgroundImage->setOffsetX(0);
+        // $backgroundImage->setOffsetY(0);
+
+        // Add question text
+        $questionShape = $currentSlide->createRichTextShape()
+            ->setHeight(100)
+            ->setWidth(600)
+            ->setOffsetX(50)
+            ->setOffsetY(50);
+        $questionShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $textRun = $questionShape->createTextRun($this->stripHtmlTags($mcq->statement));
+        $textRun->getFont()->setBold(true)
+            ->setSize(18)
+            ->setColor(new Color('FF000000'));
+
+        // Add options
+        $options = [
+            'A' => $this->stripHtmlTags($mcq->optionA),
+            'B' => $this->stripHtmlTags($mcq->optionB),
+            'C' => $this->stripHtmlTags($mcq->optionC),
+            'D' => $this->stripHtmlTags($mcq->optionD)
+        ];
+        $offsetY = 150;
+        foreach ($options as $key => $value) {
+            $optionShape = $currentSlide->createRichTextShape()
+                ->setHeight(50)
+                ->setWidth(600)
+                ->setOffsetX(50)
+                ->setOffsetY($offsetY);
+            $textRun = $optionShape->createTextRun("{$key}) {$value}"); // Changed '.' to ')'
+            $textRun->getFont()->setSize(16)
+                ->setColor(new Color('FF000000'));
+            $offsetY += 60;
+        }
+
+        // Save the presentation to a temporary file
+        $pptxFile = storage_path('app/public/mcq_' . $id . '.pptx');
+        $objWriter = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
+        $objWriter->save($pptxFile);
+
+        // Return the file as a download response
+        return response()->download($pptxFile)->deleteFileAfterSend(true);
+    }
+    private function stripHtmlTags($content)
+    {
+        return strip_tags($content);
+    }
+        //     // Retrieve the single MCQ by ID
+        // $mcq = Mcqs::findOrFail($id);
+
+        // // Create a new PHPPresentation object
+        // $objPHPPresentation = new PhpPresentation();
+
+        // // Remove the default slide
+        // $objPHPPresentation->removeSlideByIndex(0);
+
+        // // Create a new slide
+        // $customWidth = 13.33 * 9525;
+        // $currentSlide = $objPHPPresentation->createSlide();
+
+        // // Add question text
+        // $questionShape = $currentSlide->createRichTextShape()
+        //     ->setHeight(100)
+        //     ->setWidth(600)
+        //     ->setOffsetX(50)
+        //     ->setOffsetY(50);
+        // $questionShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $textRun = $questionShape->createTextRun($this->stripHtmlTags($mcq->statement));
+        // $textRun->getFont()->setBold(true)
+        //     ->setSize(18)
+        //     ->setColor(new Color('FF000000'));
+
+        // // Add options
+        // $options = [
+        //     'A' => $this->stripHtmlTags($mcq->optionA),
+        //     'B' => $this->stripHtmlTags($mcq->optionB),
+        //     'C' => $this->stripHtmlTags($mcq->optionC),
+        //     'D' => $this->stripHtmlTags($mcq->optionD)
+        // ];
+        // $offsetY = 150;
+        // foreach ($options as $key => $value) {
+        //     $optionShape = $currentSlide->createRichTextShape()
+        //         ->setHeight(50)
+        //         ->setWidth(600)
+        //         ->setOffsetX(50)
+        //         ->setOffsetY($offsetY);
+        //     $textRun = $optionShape->createTextRun("{$key}) {$value}"); // Changed '.' to ')'
+        //     $textRun->getFont()->setSize(16)
+        //         ->setColor(new Color('FF000000'));
+        //     $offsetY += 60;
+        // }
+
+        // // Save the presentation to a temporary file
+        // $pptxFile = storage_path('app/public/mcq_' . $id . '.pptx');
+        // $objWriter = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
+        // $objWriter->save($pptxFile);
+
+        // // Return the file as a download response
+        // return response()->download($pptxFile)->deleteFileAfterSend(true);
+        // }
+
+        // private function stripHtmlTags($content)
+        // {
+        //     return strip_tags($content);
+        // }
+        
+        // Retrieve the single MCQ by ID
+        //     $mcq = Mcqs::findOrFail($id);
+
+        //     // Create a new PHPPresentation object
+        //     $objPHPPresentation = new PhpPresentation();
+
+        //     // Remove the default slide
+        //     $objPHPPresentation->removeSlideByIndex(0);
+
+        //     // Create a new slide
+        //     $currentSlide = $objPHPPresentation->createSlide();
+
+        //     // Add watermark image
+        //     $watermarkImagePath = public_path('background.png'); // Replace with your watermark image path
+        //     $watermarkShape = $currentSlide->createDrawingShape();
+        //     $watermarkShape->setName('Watermark')
+        //         ->setPath($watermarkImagePath)
+        //         ->setWidth(720) // Adjust the width as needed
+        //         ->setHeight(540) // Adjust the height as needed
+        //         ->setOffsetX(0)
+        //         ->setOffsetY(0);
+
+        //     // Add question text
+        //     $questionShape = $currentSlide->createRichTextShape()
+        //         ->setHeight(100)
+        //         ->setWidth(600)
+        //         ->setOffsetX(50)
+        //         ->setOffsetY(50);
+        //     $questionShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        //     $textRun = $questionShape->createTextRun($this->stripHtmlTags($mcq->statement));
+        //     $textRun->getFont()->setBold(true)
+        //         ->setSize(18)
+        //         ->setColor(new Color('FFFFFFFF')); // White text color
+
+        //     // Add options
+        //     $options = [
+        //         'A' => $this->stripHtmlTags($mcq->optionA),
+        //         'B' => $this->stripHtmlTags($mcq->optionB),
+        //         'C' => $this->stripHtmlTags($mcq->optionC),
+        //         'D' => $this->stripHtmlTags($mcq->optionD)
+        //     ];
+        //     $offsetY = 150;
+        //     foreach ($options as $key => $value) {
+        //         $optionShape = $currentSlide->createRichTextShape()
+        //             ->setHeight(50)
+        //             ->setWidth(600)
+        //             ->setOffsetX(50)
+        //             ->setOffsetY($offsetY);
+        //         $textRun = $optionShape->createTextRun("{$key}. {$value}");
+        //         $textRun->getFont()->setSize(16)
+        //             ->setColor(new Color('FFFFFFFF')); // White text color
+        //         $offsetY += 60;
+        //     }
+
+        //     // Save the presentation to a temporary file
+        //     $pptxFile = storage_path('app/public/mcq_' . $id . '.pptx');
+        //     $objWriter = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
+        //     $objWriter->save($pptxFile);
+
+        //     // Return the file as a download response
+        //     return response()->download($pptxFile)->deleteFileAfterSend(true);
+        // }
+
+        // private function stripHtmlTags($content)
+        // {
+        //     return strip_tags($content);
+        // }
 }

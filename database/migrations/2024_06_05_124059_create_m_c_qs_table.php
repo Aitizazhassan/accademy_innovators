@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('m_c_qs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('board_id');
-            $table->unsignedBigInteger('class_id');
-            $table->unsignedBigInteger('subject_id');
-            $table->unsignedBigInteger('chapter_id');
-            $table->unsignedBigInteger('topic_id');
+            $table->unsignedBigInteger('board_id')->nullable();
+            $table->unsignedBigInteger('class_id')->nullable();
+            $table->unsignedBigInteger('subject_id')->nullable();
+            $table->unsignedBigInteger('chapter_id')->nullable();
+            $table->unsignedBigInteger('topic_id')->nullable();
             $table->longText('statement');
             $table->longText('optionA');
             $table->longText('optionB');
             $table->longText('optionC');
             $table->longText('optionD');
-            $table->string('solution_link_english');
-            $table->string('solution_link_urdu');
+            $table->string('solution_link_english')->nullable();
+            $table->string('solution_link_urdu')->nullable();
             $table->timestamps();
 
             // Optionally add foreign key constraints

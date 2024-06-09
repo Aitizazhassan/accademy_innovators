@@ -4,25 +4,25 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CrewController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\MCQsController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UsersController;
 use App\Http\Controllers\BoardController;
+use App\Http\Controllers\TopicController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\CountryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\AssemblyController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CostCodeController;
 use App\Http\Controllers\EstimateController;
+use App\Http\Controllers\ClassRoomController;
 use App\Http\Controllers\LaborCodeController;
 use App\Http\Controllers\SourceCodeController;
 use App\Http\Controllers\CrewPositionController;
 use App\Http\Controllers\MaterialCodeController;
-use App\Http\Controllers\ClassRoomController;
-use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\ChapterController;
-use App\Http\Controllers\TopicController;
-use App\Http\Controllers\MCQsController;
-use App\Http\Controllers\CountryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,6 +99,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/subjects/{class_id}', [MCQsController::class, 'getSubjects'])->name('getSubjects');
         Route::get('/chapters/{subject_id}', [MCQsController::class, 'getChapters'])->name('getChapters');
         Route::get('/topics/{chapter_id}', [MCQsController::class, 'getTopics'])->name('getTopics');
+
+        Route::get('/download-mcq/pptx/{id}', [MCQsController::class, 'downloadSingleMcqAsPptx'])->name('download.mcq.pptx');
 
     });
 });
