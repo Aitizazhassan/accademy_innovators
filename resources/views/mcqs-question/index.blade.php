@@ -178,11 +178,17 @@
                     },
                     {
                         data: 'solution_link_english',
-                        name: 'solution_link_english'
+                        name: 'solution_link_english',
+                        render: function(data, type, row) {
+                            return `<button class="btn btn-sm btn-info-alt view-qr-code" data-id="${row.id}" data-qr-code='${data}' data-solution="English"  data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
+                        }
                     },
                     {
                         data: 'solution_link_urdu',
-                        name: 'solution_link_urdu'
+                        name: 'solution_link_urdu',
+                        render: function(data, type, row) {
+                            return `<button class="btn btn-sm btn-info-alt view-qr-code" data-id="${row.id}" data-qr-code='${data}'  data-solution="Urdu"  data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
+                        }
                     },
                     {
                         data: 'dateAdded',
@@ -205,8 +211,16 @@
             // Handle view statement button click
             $('#users-table').on('click', '.view-statement', function() {
                 var statement = $(this).data('statement');
-                $('#modalContent').html(statement); // Use .html() to render HTML content
+                $('#modalContent').html(statement);
                 $('#dataModalLabel').text('Statement');
+                $('#dataModal').modal('show');
+            });
+
+            $('#users-table').on('click', '.view-qr-code', function() {
+                var qrCode = $(this).data('qr-code');
+                var solution = $(this).data('solution');
+                $('#modalContent').html(qrCode); 
+                $('#dataModalLabel').text('QR Scan Code ('+ solution + ')');
                 $('#dataModal').modal('show');
             });
 
@@ -214,7 +228,7 @@
             $('#users-table').on('click', '.view-option', function() {
                 var content = $(this).data('content');
                 var option = $(this).data('option');
-                $('#modalContent').html(content); // Use .html() to render HTML content
+                $('#modalContent').html(content);
                 $('#dataModalLabel').text('Option ' + option);
                 $('#dataModal').modal('show');
             });
