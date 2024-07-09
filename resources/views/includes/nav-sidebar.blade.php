@@ -132,13 +132,43 @@
                 </a>
             </li>
             @endcan
-            @can('user.view')
-            <li class="nav-main-item">
-                <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['mcqs.index']) ? 'active' : '' }}" href="{{ route('mcqs.index') }}">
-                    <i class="nav-main-link-icon fa fa-pen"></i><span class="nav-main-link-name">MCQs </span>
+
+            <li class="nav-main-item {{ in_array(Route::currentRouteName(), ['user.view']) ? 'open' : '' }}">
+                <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
+                    aria-expanded="false" href="#">
+                    <i class="nav-main-link-icon fa fa-whmcs"></i>
+                    <span class="nav-main-link-name">MCQs</span>
                 </a>
+                <ul class="nav-main-submenu">
+
+                    {{-- mcqs --}}
+                    @can('mcqs.view')
+                    <li class="nav-main-item">
+                        <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['mcqs.index']) ? 'active' : '' }}" href="{{ route('mcqs.index') }}">
+                            <i class="nav-main-link-icon fa fa-list"></i><span class="nav-main-link-name">Index </span>
+                        </a>
+                    </li>
+                    @endcan
+
+                    {{-- book format --}}
+                    @can('mcqs.view')
+                    <li class="nav-main-item">
+                        <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['mcqs.bookFormat']) ? 'active' : '' }}" href="{{ route('mcqs.bookFormat') }}">
+                            <i class="nav-main-link-icon fa fa-book"></i><span class="nav-main-link-name">Book Format</span>
+                        </a>
+                    </li>
+                    @endcan
+                    
+                    {{-- Test format --}}
+                    @can('mcqs.view')
+                    <li class="nav-main-item">
+                        <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['roles.testFormat']) ? 'active' : '' }}" href="{{ route('mcqs.testFormat') }}">
+                            <i class="nav-main-link-icon fa-solid fa-book"></i><span class="nav-main-link-name">Test Format</span>
+                        </a>
+                    </li>
+                    @endcan
+                </ul>
             </li>
-            @endcan
         </ul>
         </div>
         <!-- END Side Navigation -->

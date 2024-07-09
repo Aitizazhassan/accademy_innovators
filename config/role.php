@@ -5,5 +5,11 @@ return [
         'user', 
         'role', 
         'profile', 
+        'country', 
+        'board', 
+        'class', 
+        'subject', 
+        'topic', 
+        'mcqs', 
     ]
 ];

@@ -93,14 +93,24 @@ Route::middleware('auth')->group(function () {
 
         // chapter
         Route::resource('topic', TopicController::class);
-        Route::resource('mcqs', MCQsController::class);
 
+        Route::get('/get-boards/{country_id}', [MCQsController::class, 'getboards'])->name('getBoards');
         Route::get('/classes/{board_id}', [MCQsController::class, 'getClass'])->name('getClass');
         Route::get('/subjects/{class_id}', [MCQsController::class, 'getSubjects'])->name('getSubjects');
         Route::get('/chapters/{subject_id}', [MCQsController::class, 'getChapters'])->name('getChapters');
         Route::get('/topics/{chapter_id}', [MCQsController::class, 'getTopics'])->name('getTopics');
 
         Route::get('/download-mcq/pptx/{id}', [MCQsController::class, 'downloadSingleMcqAsPptx'])->name('download.mcq.pptx');
+
+        Route::get('/export-mcqs', [MCQsController::class, 'exportMCQsToPDF'])->name('mcqs.export');
+        Route::get('/mcqs-bookformat', [MCQsController::class, 'viewBookFormatPDF']);
+
+    });
+
+    Route::resource('mcqs', MCQsController::class);
+    Route::prefix('mcqs')->group(function () {
+        Route::get('/get/book-format', [MCQsController::class, 'bookFormat'])->name('mcqs.bookFormat');
+        Route::get('/get/test-format', [MCQsController::class, 'testFormat'])->name('mcqs.testFormat');
 
     });
 });

@@ -22,6 +22,13 @@ class GenericRoleAndPermissionSeeder extends Seeder
             'user'    => ['create', 'view', 'edit', 'delete'],
             'role'    => ['create', 'view', 'edit', 'delete'],
             'profile' => ['create', 'view', 'edit', 'delete'],
+            'country' => ['create', 'view', 'edit', 'delete'],
+            'board' => ['create', 'view', 'edit', 'delete'],
+            'class' => ['create', 'view', 'edit', 'delete'],
+            'subject' => ['create', 'view', 'edit', 'delete'],
+            'chapter' => ['create', 'view', 'edit', 'delete'],
+            'topic' => ['create', 'view', 'edit', 'delete'],
+            'mcqs' => ['create', 'view', 'edit', 'delete'],
         ];
 
         // assign permissions to user having role admin first created 

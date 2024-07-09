@@ -17,7 +17,7 @@
             <form method="POST" action="{{ route('mcqs.store') }}">
                 @csrf
                 <div class="row push p-sm-2 p-lg-4">
-                    <!-- Board Name Selection -->
+                    <!-- Country Name Selection -->
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="country_id">Country Name</label>
@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- Class Name Selection -->
-                    <div class="col-xl-6 order-xl-0">
+                    {{-- <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="class_id">Class Name</label>
                             <select name="class_id" id="class_id" class="form-control form-control-sm select2-single">
@@ -55,10 +55,10 @@
                             </select>
                             <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
                         </div>
-                    </div>
+                    </div> --}}
 
                     <!-- Subject Name Selection -->
-                    <div class="col-xl-4 order-xl-0">
+                    {{-- <div class="col-xl-4 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="subject_id">Subject Name</label>
                             <select name="subject_id" id="subject_id" class="form-control form-control-sm select2-single">
@@ -66,10 +66,10 @@
                             </select>
                             <x-input-error :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
-                    </div>
+                    </div> --}}
 
                     <!-- Chapter Name Selection -->
-                    <div class="col-xl-4 order-xl-0">
+                    {{-- <div class="col-xl-4 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="chapter_id">Chapter Name</label>
                             <select name="chapter_id" id="chapter_id" class="form-control form-control-sm select2-single">
@@ -77,10 +77,10 @@
                             </select>
                             <x-input-error :messages="$errors->get('chapter_id')" class="mt-2" />
                         </div>
-                    </div>
+                    </div> --}}
 
                     <!-- Topic Name Selection -->
-                    <div class="col-xl-4 order-xl-0">
+                    {{-- <div class="col-xl-4 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="topic_id">Topic Name</label>
                             <select name="topic_id" id="topic_id" class="form-control form-control-sm select2-single">
@@ -88,134 +88,12 @@
                             </select>
                             <x-input-error :messages="$errors->get('topic_id')" class="mt-2" />
                         </div>
-                    </div>
-
-                    <!-- Statement CKEditor -->
-                    <div class="col-xl-12 order-xl-0">
-                        <div class="mb-4">
-                            <div class="block block-rounded">
-                                <div class="block-header block-header-default">
-                                    <h3 class="block-title">Statement</h3>
-                                    <div class="block-options">
-                                        <button type="button" class="btn-block-option">
-                                            <i class="si si-settings"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="block-content">
-                                    <div class="mb-4">
-                                        <textarea id="js-ckeditor-statement" name="statement"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Option A CKEditor -->
-                    <div class="col-xl-12 order-xl-0">
-                        <div class="mb-4">
-                            <div class="block block-rounded">
-                                <div class="block-header block-header-default">
-                                    <h3 class="block-title">Option A</h3>
-                                    <div class="block-options">
-                                        <button type="button" class="btn-block-option">
-                                            <i class="si si-settings"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="block-content">
-                                    <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-a" name="optionA"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Option B CKEditor -->
-                    <div class="col-xl-12 order-xl-0">
-                        <div class="mb-4">
-                            <div class="block block-rounded">
-                                <div class="block-header block-header-default">
-                                    <h3 class="block-title">Option B</h3>
-                                    <div class="block-options">
-                                        <button type="button" class="btn-block-option">
-                                            <i class="si si-settings"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="block-content">
-                                    <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-b" name="optionB"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Option C CKEditor -->
-                    <div class="col-xl-12 order-xl-0">
-                        <div class="mb-4">
-                            <div class="block block-rounded">
-                                <div class="block-header block-header-default">
-                                    <h3 class="block-title">Option C</h3>
-                                    <div class="block-options">
-                                        <button type="button" class="btn-block-option">
-                                            <i class="si si-settings"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="block-content">
-                                    <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-c" name="optionC"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Option D CKEditor -->
-                    <div class="col-xl-12 order-xl-0">
-                        <div class="mb-4">
-                            <div class="block block-rounded">
-                                <div class="block-header block-header-default">
-                                    <h3 class="block-title">Option D</h3>
-                                    <div class="block-options">
-                                        <button type="button" class="btn-block-option">
-                                            <i class="si si-settings"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="block-content">
-                                    <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-d" name="optionD"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Solution Links -->
-                    <div class="col-xl-6 order-xl-0">
-                        <div class="mb-4">
-                            <label class="form-label" for="solution_link_english">Solution Link (English)</label>
-                            <input type="text" name="solution_link_english" id="solution_link_english" class="form-control form-control-sm">
-                            <x-input-error :messages="$errors->get('solution_link_english')" class="mt-2" />
-                        </div>
-                    </div>
-
-                    <div class="col-xl-6 order-xl-0">
-                        <div class="mb-4">
-                            <label class="form-label" for="solution_link_urdu">Solution Link (Urdu)</label>
-                            <input type="text" name="solution_link_urdu" class="form-control form-control-sm">
-                            <x-input-error :messages="$errors->get('solution_link_urdu')" class="mt-2" />
-                        </div>
-                    </div>
+                    </div> --}}
 
                     <!-- Submit Button -->
                     <div class="mb-4">
                         <button type="submit" class="btn btn-alt-primary">
-                            <i class="fa fa-check-circle opacity-50 me-1"></i> Create
+                            <i class="fa fa-check-circle opacity-50 me-1"></i> Get MCQS
                         </button>
                     </div>
                 </div>

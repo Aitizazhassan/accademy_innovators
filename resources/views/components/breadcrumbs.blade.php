@@ -8,7 +8,9 @@
                         <li class="breadcrumb-item"><a href="{{ route('projects.index') }}">Projects</a>
                         </li>
                         @else
-                        <li class="breadcrumb-item"><a href="{{ url($breadcrumb['url']) }}">{{ $breadcrumb['name'] }}</a>
+                        {{-- <li class="breadcrumb-item"><a href="{{ url($breadcrumb['url']) }}">{{ $breadcrumb['name'] }}</a>
+                        </li> --}}
+                        <li class="breadcrumb-item">{{ $breadcrumb['name'] }}
                         </li>
                         @endif
                     @else

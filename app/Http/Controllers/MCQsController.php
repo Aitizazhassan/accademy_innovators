@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MCQs;
+use App\Models\Country;
 use App\Models\Board;
 use App\Models\Topic;
 use App\Models\Chapter;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Barryvdh\DomPDF\Facade\PDF as PDF;
 
 class MCQsController extends Controller
 {
@@ -116,10 +118,18 @@ class MCQsController extends Controller
         $pageTitle = 'Create MCQs';
         $activeMenu = 'create_MCQs';
 
-        $board = Board::all();
-        return view('mcqs-question.create', compact('activeMenu', 'pageHead', 'pageTitle', 'board'));
+        $countries = Country::all();
+        return view('mcqs-question.create', compact('activeMenu', 'pageHead', 'pageTitle', 'countries'));
     }
 
+    public function getboards($country_id)
+    {
+        $boards = Board::whereHas('countries', function ($query) use ($country_id) {
+            $query->where('country_id', $country_id);
+        })->get();
+
+        return response()->json($boards);
+    }
     public function getClass($board_id)
     {
         $classes = Classroom::whereHas('boards', function ($query) use ($board_id) {
@@ -366,5 +376,49 @@ class MCQsController extends Controller
         $qrCodeDataUri = $qrCodeImage->getDataUri();
         
         return '<img src="' . $qrCodeDataUri . '" alt="QR Code" style="width:100px;height:100px;"/>';
+    }
+
+    public function exportMCQsToPDF()
+    {
+        $mcqs = MCQs::all();
+        $mcqs = $mcqs->map(function ($mcq) {
+            $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+            $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+            return $mcq;
+        });
+        return $this->generatePDF($mcqs);
+    }
+
+    public function generatePDF($mcqs)
+    {
+        $pdf = PDF::loadView('mcqs-question.mcqs_book_format_pdf', compact('mcqs'));
+        return $pdf->download('mcqs.pdf');
+    }
+
+    public function viewBookFormatPDF(){
+        $mcqs = MCQs::all();
+    
+        $mcqs = $mcqs->map(function ($mcq) {
+            $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+            $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+            return $mcq;
+        });
+        
+        return view('mcqs-question.mcqs_book_format_pdf', ['mcqs' => $mcqs]);
+    }
+
+    public function bookFormat()
+    {
+        $pageHead = 'Get Book Format MCQs';
+        $pageTitle = 'Get Book Format MCQs';
+        $activeMenu = 'get_book_format_MCQs';
+
+        $countries = Country::all();
+        return view('mcqs-question.book_format', compact('activeMenu', 'pageHead', 'pageTitle', 'countries'));
+    }
+
+    public function testFormat()
+    {
+        
     }
 }
