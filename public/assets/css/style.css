@@ -16,3 +16,7 @@ img.logo-img.img-fluid {
         text-align: center;
     }
 }
+
+.cke_notifications_area {
+    display: none;
+}

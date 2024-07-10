@@ -133,7 +133,7 @@
             </li>
             @endcan
 
-            <li class="nav-main-item {{ in_array(Route::currentRouteName(), ['user.view']) ? 'open' : '' }}">
+            <li class="nav-main-item {{ in_array(Route::currentRouteName(), ['mcqs.index', 'mcqs.create', 'mcqs.edit', 'mcqs.bookFormat', 'mcqs.testFormat']) ? 'open' : '' }}">
                 <a class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true"
                     aria-expanded="false" href="#">
                     <i class="nav-main-link-icon fa fa-whmcs"></i>
@@ -162,8 +162,16 @@
                     {{-- Test format --}}
                     @can('mcqs.view')
                     <li class="nav-main-item">
-                        <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['roles.testFormat']) ? 'active' : '' }}" href="{{ route('mcqs.testFormat') }}">
+                        <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['mcqs.testFormat']) ? 'active' : '' }}" href="{{ route('mcqs.testFormat') }}">
                             <i class="nav-main-link-icon fa-solid fa-book"></i><span class="nav-main-link-name">Test Format</span>
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('mcqs.view')
+                    <li class="nav-main-item">
+                        <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['mcqs.pdfBookFormat']) ? 'active' : '' }}" href="{{ route('mcqs.pdfBookFormat') }}">
+                            <i class="nav-main-link-icon fa fa-file-pdf"></i><span class="nav-main-link-name">Book format PDF</span>
                         </a>
                     </li>
                     @endcan

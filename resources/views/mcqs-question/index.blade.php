@@ -26,14 +26,30 @@
     <div class="container-fluid">
         <!-- DataTales Example -->
         <div class="content">
-
             <!-- Dynamic Table Responsive -->
             <div class="block block-rounded">
                 <div class="block-content block-content-full">
-                    <table class="table table-bordered table-striped table-vcenter table-sm " id="users-table">
+
+                    <!-- Filter Select Fields -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="filterSolution" class="form-label">Filter by Solution Links</label>
+                            <select class="form-select form-select-sm" id="filterSolution">
+                                <option value="">All</option>
+                                <option value="english">Has English Solution</option>
+                                <option value="urdu">Has Urdu Solution</option>
+                                <option value="both">Has Both Solutions</option>
+                                <option value="no_english">No English Solutions</option>
+                                <option value="no_urdu">No Urdu Solutions</option>
+                                <option value="none">No Solutions</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="table table-bordered table-striped table-vcenter table-sm " id="mcqs-table">
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 8%">{{ __('#') }}</th>
+                                <th style="width: 8%">{{ __('Country') }}</th>
                                 <th style="width: 8%">{{ __('Boards') }}</th>
                                 <th style="width: 8%">{{ __('Class') }}</th>
                                 <th style="width: 8%">{{ __('Subjects') }}</th>
@@ -108,18 +124,27 @@
 
     <script>
         $(document).ready(function() {
-            var usersDataTable = $('#users-table').DataTable({
+            var mcqsDataTable = $('#mcqs-table').DataTable({
                 processing: true,
                 serverSide: true,
                 pagingType: "full_numbers",
                 autoWidth: false,
                 responsive: true,
-                ajax: "{{ route('mcqs.index') }}",
+                ajax: {
+                    url: "{{ route('mcqs.index') }}",
+                    data: function (d) {
+                        d.solutionFilter = $('#filterSolution').val();
+                    }
+                },
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false
+                    },
+                    {
+                        data: 'country_name',
+                        name: 'country_name'
                     },
                     {
                         data: 'board_name',
@@ -180,14 +205,22 @@
                         data: 'solution_link_english',
                         name: 'solution_link_english',
                         render: function(data, type, row) {
-                            return `<button class="btn btn-sm btn-info-alt view-qr-code" data-id="${row.id}" data-qr-code='${data}' data-solution="English"  data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
+                            if (row.solution_link_english) {
+                                return `<button class="btn btn-sm btn-info-alt view-qr-code" data-id="${row.id}" data-qr-code='${data}' data-solution="English"  data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
+                            } else {
+                                return '';
+                            }
                         }
                     },
                     {
                         data: 'solution_link_urdu',
                         name: 'solution_link_urdu',
                         render: function(data, type, row) {
-                            return `<button class="btn btn-sm btn-info-alt view-qr-code" data-id="${row.id}" data-qr-code='${data}'  data-solution="Urdu"  data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
+                            if (row.solution_link_urdu) {
+                                return `<button class="btn btn-sm btn-info-alt view-qr-code" data-id="${row.id}" data-qr-code='${data}'  data-solution="Urdu"  data-bs-toggle="tooltip" title="View"><i class="fa fa-eye"></button>`;
+                            } else {
+                                return '';
+                            }
                         }
                     },
                     {
@@ -200,23 +233,28 @@
                         orderable: false,
                         searchable: false
                     }
-                ]
+                ],
             });
 
             // Initialize Bootstrap tooltips after DataTable is loaded
-            usersDataTable.on('draw', function() {
+            mcqsDataTable.on('draw', function() {
                 $('[data-bs-toggle="tooltip"]').tooltip();
             });
 
+            $(document).on('change', '#filterSolution', function(e){
+                e.preventDefault();
+                mcqsDataTable.ajax.reload();
+            })
+
             // Handle view statement button click
-            $('#users-table').on('click', '.view-statement', function() {
+            $('#mcqs-table').on('click', '.view-statement', function() {
                 var statement = $(this).data('statement');
                 $('#modalContent').html(statement);
                 $('#dataModalLabel').text('Statement');
                 $('#dataModal').modal('show');
             });
 
-            $('#users-table').on('click', '.view-qr-code', function() {
+            $('#mcqs-table').on('click', '.view-qr-code', function() {
                 var qrCode = $(this).data('qr-code');
                 var solution = $(this).data('solution');
                 $('#modalContent').html(qrCode); 
@@ -225,7 +263,7 @@
             });
 
             // Handle view option button click
-            $('#users-table').on('click', '.view-option', function() {
+            $('#mcqs-table').on('click', '.view-option', function() {
                 var content = $(this).data('content');
                 var option = $(this).data('option');
                 $('#modalContent').html(content);
@@ -234,7 +272,7 @@
             });
 
             // Delete user
-            $('#users-table').on('click', '.delete-user', function(e) {
+            $('#mcqs-table').on('click', '.delete-user', function(e) {
                 e.preventDefault(); // Prevent the default link behavior
 
                 var userId = $(this).data('id');
@@ -259,7 +297,7 @@
                             },
                             success: function(response) {
                                 // Reload the DataTable after successful deletion
-                                usersDataTable.ajax.reload();
+                                mcqsDataTable.ajax.reload();
 
                                 // Optionally, show a success message
                                 Dashmix.helpers('jq-notify', {

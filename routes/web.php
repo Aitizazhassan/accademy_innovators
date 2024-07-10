@@ -102,15 +102,16 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/download-mcq/pptx/{id}', [MCQsController::class, 'downloadSingleMcqAsPptx'])->name('download.mcq.pptx');
 
-        Route::get('/export-mcqs', [MCQsController::class, 'exportMCQsToPDF'])->name('mcqs.export');
-        Route::get('/mcqs-bookformat', [MCQsController::class, 'viewBookFormatPDF']);
-
     });
 
     Route::resource('mcqs', MCQsController::class);
     Route::prefix('mcqs')->group(function () {
         Route::get('/get/book-format', [MCQsController::class, 'bookFormat'])->name('mcqs.bookFormat');
         Route::get('/get/test-format', [MCQsController::class, 'testFormat'])->name('mcqs.testFormat');
+        Route::get('/get/test-format', [MCQsController::class, 'testFormat'])->name('mcqs.testFormat');
+
+        Route::get('/pdf-book-format/export-mcqs', [MCQsController::class, 'exportMCQsToPDF'])->name('mcqs.pdfBookFormat');
+        Route::get('/mcqs-bookformat', [MCQsController::class, 'viewBookFormatPDF']);
 
     });
 });

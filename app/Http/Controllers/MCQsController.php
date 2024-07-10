@@ -44,10 +44,42 @@ class MCQsController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = MCQs::with(['board', 'class', 'subject', 'chapter', 'topic'])->get();
-
+            $query = MCQs::with(['country', 'board', 'class', 'subject', 'chapter', 'topic']);
+    
+            // Filter by solution links
+            $solutionFilter = $request->input('solutionFilter');
+            if ($solutionFilter) {
+                switch ($solutionFilter) {
+                    case 'english':
+                        $query->whereNotNull('solution_link_english');
+                        break;
+                    case 'urdu':
+                        $query->whereNotNull('solution_link_urdu');
+                        break;
+                    case 'no_english':
+                            $query->whereNull('solution_link_english');
+                            break;
+                    case 'no_urdu':
+                            $query->whereNull('solution_link_urdu');
+                            break;
+                    case 'both':
+                        $query->whereNotNull('solution_link_english')
+                              ->whereNotNull('solution_link_urdu');
+                        break;
+                    case 'none':
+                        $query->whereNull('solution_link_english')
+                              ->whereNull('solution_link_urdu');
+                        break;
+                }
+            }
+    
+            $data = $query->get();
+    
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('country_name', function ($row) {
+                    return $row->country->name;
+                })
                 ->addColumn('board_name', function ($row) {
                     return $row->board->name;
                 })
@@ -78,12 +110,6 @@ class MCQsController extends Controller
                 ->addColumn('optionD', function ($row) {
                     return $row->optionD;
                 })
-                // ->addColumn('solution_link_english', function ($row) {
-                //     return $row->solution_link_english;
-                // })
-                // ->addColumn('solution_link_urdu', function ($row) {
-                //     return $row->solution_link_urdu;
-                // })
                 ->addColumn('solution_link_english', function ($row) {
                     if (!empty($row->solution_link_english)) {
                         return $this->generateQrCodeImage($row->solution_link_english);
@@ -171,6 +197,7 @@ class MCQsController extends Controller
     {
 
         $request->validate([
+            'country_id' => 'required',
             'board_id' => 'required',
             'subject_id' => 'required',
             'chapter_id' => 'required',
@@ -186,6 +213,7 @@ class MCQsController extends Controller
         ]);
 
         $mcq = new MCQs();
+        $mcq->country_id = $request->country_id;
         $mcq->board_id = $request->board_id;
         $mcq->subject_id = $request->subject_id;
         $mcq->chapter_id = $request->chapter_id;
@@ -225,6 +253,7 @@ class MCQsController extends Controller
     public function update(Request $request, MCQs $mcq)
     {
         $validated = $request->validate([
+            'country_id' => 'required',
             'board_id' => 'required',
             'class_id' => 'required',
             'subject_id' => 'required',
@@ -290,7 +319,7 @@ class MCQsController extends Controller
             ->setOffsetX(50)
             ->setOffsetY(50);
         $questionShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $questionShape->createTextRun($this->stripHtmlTags($mcq->statement));
+        $textRun = $questionShape->createTextRun(str_replace('&nbsp;', ' ', $this->stripHtmlTags($mcq->statement)));
         $textRun->getFont()->setBold(true)
             ->setSize(18)
             ->setColor(new Color('FF000000'));
@@ -375,7 +404,7 @@ class MCQsController extends Controller
         $qrCodeImage = $writer->write($qrCode);
         $qrCodeDataUri = $qrCodeImage->getDataUri();
         
-        return '<img src="' . $qrCodeDataUri . '" alt="QR Code" style="width:100px;height:100px;"/>';
+        return '<img src="' . $qrCodeDataUri . '" alt="QR Code" style="width:50px;height:50px;"/>';
     }
 
     public function exportMCQsToPDF()

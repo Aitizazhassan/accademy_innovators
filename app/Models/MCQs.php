@@ -9,6 +9,7 @@ class MCQs extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'country_id',
         'board_id',
         'subject_id',
         'chapter_id',
@@ -22,6 +23,12 @@ class MCQs extends Model
         'solution_link_english',
         'solution_link_urdu',
     ];
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
     public function board()
     {
         return $this->belongsTo(Board::class);

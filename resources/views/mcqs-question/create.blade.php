@@ -233,11 +233,21 @@
 
 <script>
         document.addEventListener("DOMContentLoaded", function() {
-        CKEDITOR.replace('js-ckeditor-statement');
-        CKEDITOR.replace('js-ckeditor-option-a');
-        CKEDITOR.replace('js-ckeditor-option-b');
-        CKEDITOR.replace('js-ckeditor-option-c');
-        CKEDITOR.replace('js-ckeditor-option-d');
+        CKEDITOR.replace('js-ckeditor-statement', { 
+            extraPlugins: 'notification,notificationaggregator',
+        });
+        CKEDITOR.replace('js-ckeditor-option-a', { 
+            extraPlugins: 'notification,notificationaggregator',
+        });
+        CKEDITOR.replace('js-ckeditor-option-b', { 
+            extraPlugins: 'notification,notificationaggregator',
+        });
+        CKEDITOR.replace('js-ckeditor-option-c', { 
+            extraPlugins: 'notification,notificationaggregator',
+        });
+        CKEDITOR.replace('js-ckeditor-option-d', { 
+            extraPlugins: 'notification,notificationaggregator',
+        });
     });
     $(document).ready(function() {
         $('.select2-single').select2();
