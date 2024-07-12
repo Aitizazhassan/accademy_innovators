@@ -22,13 +22,13 @@
                         <div class="mb-4">
                             <label class="form-label" for="country_id">Country Name</label>
                             <select name="country_id" id="country_id" class="form-control form-control-sm select2-single">
-                                <option value="">Select Board</option>
+                                <option value="">Select Country</option>
                                 @forelse ($countries as $row)
                                     <option value="{{ $row->id }}" {{ old('country_id') == $row->id ? 'selected' : '' }}>
                                         {{ $row->name }}
                                     </option>
                                 @empty
-                                    <option value="">No Board found</option>
+                                    <option value="">No Country found</option>
                                 @endforelse
                             </select>
                             <x-input-error :messages="$errors->get('country_id')" class="mt-2" />
@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- Class Name Selection -->
-                    {{-- <div class="col-xl-6 order-xl-0">
+                    <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="class_id">Class Name</label>
                             <select name="class_id" id="class_id" class="form-control form-control-sm select2-single">
@@ -55,18 +55,30 @@
                             </select>
                             <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
                         </div>
-                    </div> --}}
+                    </div>
+
+                    <!-- select pathern-->
+                    <div class="col-xl-6 order-xl-0">
+                        <div class="mb-4">
+                            <label class="form-label" for="select_pathern">Pathern</label>
+                            <select name="select_pathern" id="select_pathern" class="form-control form-control-sm select2-single">
+                                <option value="chapter_wise">Chapter Wise</option>
+                                <option value="grand_test">Grand Test</option>
+                                <option value="mock_test">MOCK TEST</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('select_pathern')" class="mt-2" />
+                        </div>
+                    </div>
 
                     <!-- Subject Name Selection -->
-                    {{-- <div class="col-xl-4 order-xl-0">
+                    <div class="col-xl-4 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="subject_id">Subject Name</label>
+                            <label class="form-label" for="subject_id">Select Subject</label>
                             <select name="subject_id" id="subject_id" class="form-control form-control-sm select2-single">
-                                <option value="">Select Subject</option>
                             </select>
                             <x-input-error :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
-                    </div> --}}
+                    </div>
 
                     <!-- Chapter Name Selection -->
                     {{-- <div class="col-xl-4 order-xl-0">
@@ -106,17 +118,7 @@
     </div>
     <!-- END Page Content -->
 </x-app-layout>
-
-<script>Dashmix.helpersOnLoad(['js-ckeditor', 'js-simplemde']);</script>
-
 <script>
-        document.addEventListener("DOMContentLoaded", function() {
-        CKEDITOR.replace('js-ckeditor-statement');
-        CKEDITOR.replace('js-ckeditor-option-a');
-        CKEDITOR.replace('js-ckeditor-option-b');
-        CKEDITOR.replace('js-ckeditor-option-c');
-        CKEDITOR.replace('js-ckeditor-option-d');
-    });
     $(document).ready(function() {
         $('.select2-single').select2();
 
@@ -194,8 +196,8 @@
                     url: getSubjectsUrl.replace(':class_id', classId),
                     type: 'GET',
                     success: function(data) {
-                        $('#subject_id').empty().append(
-                            '<option value="">Select Subject</option>');
+                        // $('#subject_id').empty().append(
+                        //     '<option value="">Select Subject</option>');
                         $.each(data, function(key, value) {
                             $('#subject_id').append('<option value="' + value.id +
                                 '">' + value.name + '</option>');
@@ -255,5 +257,55 @@
                 $('#topic_id').empty().append('<option value="">Select Topic</option>');
             }
         });
-    });
+
+        $('#select_pathern').change(function(e) {
+            e.preventDefault();
+            var selectedPathern = $(this).val();
+            var subjectSelect = $('#subject_id');
+            var classId = $('#class_id').val();
+
+            subjectSelect.empty(); // Clear existing options
+            // subjectSelect.append('<option value="">Select Subject</option>');
+
+            // Fetch and populate subjects
+            getSubjects(classId, function(subjects) {
+                switch (selectedPathern) {
+                    case 'chapter_wise':
+                        subjectSelect.attr('multiple', false); // Single select
+                        break;
+                    case 'grand_test':
+                        subjectSelect.attr('multiple', 'multiple'); // Multiple select
+                        break;
+                    case 'mock_test':
+                        subjectSelect.attr('multiple', 'multiple'); // Multiple select
+                        break;
+                    default:
+                        subjectSelect.attr('multiple', false); // Default to single select
+                }
+
+                subjects.forEach(function(subject) {
+                    subjectSelect.append('<option value="' + subject.id + '">' + subject.name + '</option>');
+                });
+                $('.select2-single').select2();
+            });
+        });
+
+        function getSubjects(classId, callback) {
+            if (classId) {
+                $.ajax({
+                    url: getSubjectsUrl.replace(':class_id', classId),
+                    type: 'GET',
+                    success: function(data) {
+                        callback(data);
+                    },
+                    error: function() {
+                        console.error('Failed to fetch subjects');
+                        callback([]);
+                    }
+                });
+            } else {
+                callback([]);
+            }
+        }
+    }); 
 </script>
