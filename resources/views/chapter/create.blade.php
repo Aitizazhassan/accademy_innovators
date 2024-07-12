@@ -22,7 +22,7 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="profile-edit-name">Subject Name</label>
-                           <select name="subject_id[]" id="classroom_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
+                           <select name="subject_id[]" id="classroom_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple" required>
                                 <option disabled value="">select</option>
                                 @forelse ($subjects as $row)
                                     <option value="{{ $row->id }}" {{ old('subject_id') == $row->id?'selected':'' }}>{{ $row->name }}</option>
@@ -30,14 +30,14 @@
                                     <option value="">No subject found</option>
                                 @endforelse
                             </select>
-                            <x-input-error :messages="$errors->get('borad_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('borad_id')" class="mt-2" />
                         </div>
                     </div>
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="chapter-names">Chapter Name</label>
                             <select name="name[]" id="chapter-names" class="form-control select2-multiple" multiple="multiple"></select>
-                            <x-input-error :messages="$errors->get('name.*')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
                         </div>
                     </div>
                     <div class="mb-4">

@@ -34,7 +34,7 @@
                                             <option value="">No sessions found</option>
                                         @endforelse
                                     </select>
-                                    <x-input-error :messages="$errors->get('borad_id')" class="mt-2" />
+                                    <x-input-error-field  :messages="$errors->get('borad_id')" class="mt-2" />
                                 </div>
                             </div>
                             <div class="col-xl-6 order-xl-0">
@@ -43,7 +43,7 @@
                                     <input type="text" name="name" value="{{ old('name', $classroom->name) }}"
                                         autocomplete="name" class="form-control form-contol-sm select2"
                                         id="profile-edit-name" placeholder="Enter Name">
-                                    <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
+                                   <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
                                 </div>
                             </div>
                             <div class="mb-4">

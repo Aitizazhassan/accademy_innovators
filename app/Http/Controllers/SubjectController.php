@@ -28,7 +28,7 @@ class SubjectController extends Controller
                 })
                 ->addColumn('subject_countries', function ($row) {
                     $countries = '';
-                    $addedCountries = []; 
+                    $addedCountries = [];
                     if ($row->classrooms) {
                         foreach ($row->classrooms as $classroom) {
                             if ($classroom->boards) {
@@ -49,7 +49,7 @@ class SubjectController extends Controller
                 })
                 ->addColumn('subject_boards', function ($row) {
                     $boards = '';
-                    $addedBoards = []; 
+                    $addedBoards = [];
                     if ($row->classrooms) {
                         foreach ($row->classrooms as $classroom) {
                             if ($classroom->boards) {
@@ -117,7 +117,7 @@ class SubjectController extends Controller
     {
         $validatedData = $request->validate([
             'name.*' => 'required|string',
-            'classroom_id' => 'required|array',
+            'classroom_id.*' => 'required|string',
         ]);
 
         foreach ($validatedData['name'] as $name) {
