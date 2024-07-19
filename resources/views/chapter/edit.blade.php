@@ -22,7 +22,7 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group">
                             <label for="Subject">Subject Name</label>
-                            <select name="subject_id[]" id="subject_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
+                            <select name="subject_id[]" id="subject_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple" required>
                             <option disabled value="">Select</option>
                                 @forelse ($subjects as $row)
                                     <option value="{{ $row->id }}" {{ in_array($row->id, old('subject_id', $chapter->subjects->pluck('id')->toArray())) ? 'selected' : '' }}>
@@ -32,7 +32,7 @@
                                     <option value="">No subjects found</option>
                                 @endforelse
                             </select>
-                            <x-input-error :messages="$errors->get('subject_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
                     </div>
                     <div class="col-xl-6 order-xl-0">

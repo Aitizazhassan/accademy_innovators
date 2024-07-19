@@ -39,8 +39,8 @@ class TopicController extends Controller
                 })
                 ->addColumn('topic_countries', function ($row) {
                     $countries = '';
-                    $addedCountries = []; 
-                    
+                    $addedCountries = [];
+
                     if ($row->chapters) {
                         foreach ($row->chapters as $chapter) {
                             if ($chapter->subjects) {
@@ -70,7 +70,7 @@ class TopicController extends Controller
                 ->addColumn('topic_boards', function ($row) {
                     $boards = '';
                     $addedBoards = [];
-                    
+
                     if ($row->chapters) {
                         foreach ($row->chapters as $chapter) {
                             if ($chapter->subjects) {
@@ -95,8 +95,8 @@ class TopicController extends Controller
                 })
                 ->addColumn('topic_classrooms', function ($row) {
                     $classrooms = '';
-                    $addedClassrooms = []; 
-                    
+                    $addedClassrooms = [];
+
                     if ($row->chapters) {
                         foreach ($row->chapters as $chapter) {
                             if ($chapter->subjects) {
@@ -118,7 +118,7 @@ class TopicController extends Controller
                 ->addColumn('topic_subjects', function ($row) {
                     $subjects = '';
                     $addedSubjects = [];
-                    
+
                     if ($row->chapters) {
                         foreach ($row->chapters as $chapter) {
                             if ($chapter->subjects) {
@@ -136,7 +136,7 @@ class TopicController extends Controller
                 ->addColumn('topic_chapters', function ($row) {
                     $chapters = '';
                     $addedChapters = [];
-                    
+
                     if ($row->chapters) {
                         foreach ($row->chapters as $chapter) {
                             if (!in_array($chapter->name, $addedChapters)) {

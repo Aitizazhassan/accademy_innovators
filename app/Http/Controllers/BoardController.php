@@ -82,6 +82,7 @@ class BoardController extends Controller
 
     public function store(Request $request)
     {
+
         // Validate the incoming request data
         $validatedData = $request->validate([
             'name.*' => 'required|string',

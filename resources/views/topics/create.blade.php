@@ -33,7 +33,7 @@
                                     <option value="">No subject found</option>
                                 @endforelse
                             </select>
-                            <x-input-error :messages="$errors->get('borad_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('chapter_id')" class="mt-2" />
                         </div>
                     </div>
                     <div class="col-xl-6 order-xl-0">
@@ -41,7 +41,7 @@
                             <label class="form-label" for="topic-names">Topic Name</label>
                             <select name="name[]" id="topic-names" class="form-control select2-multiple"
                                 multiple="multiple"></select>
-                            <x-input-error :messages="$errors->get('name.*')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
                         </div>
                     </div>
                     <div class="mb-4">

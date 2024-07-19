@@ -66,6 +66,7 @@ class CountryController extends Controller
 
     public function store(Request $request)
     {
+        
         // Validate the incoming request data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255', // Change 'first_name' to 'name'

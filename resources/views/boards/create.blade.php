@@ -35,7 +35,8 @@
                                     <option value="">No Country found</option>
                                 @endforelse
                             </select>
-                            <x-input-error :messages="$errors->get('country_id')" class="mt-2" />
+
+                             <x-input-error-field :messages="$errors->get('country_id')" class="mt-2" />
                         </div>
                     </div>
                     {{-- <div class="col-xl-6 order-xl-0">
@@ -49,8 +50,9 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="board-name">Board Name</label>
-                            <select name="name[]" id="board-name" class="form-control select2-multiple" multiple="multiple"></select>
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            <select name="name[]" id="board-name" class="form-control select2-multiple" multiple="multiple" required></select>
+                            <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
+
 
                         </div>
                     </div>

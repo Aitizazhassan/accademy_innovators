@@ -30,7 +30,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('chapter_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('chapter_id')" class="mt-2" />
                         </div>
                     </div>
                     <div class="col-xl-6 order-xl-0">
