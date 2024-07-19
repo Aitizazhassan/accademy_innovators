@@ -28,6 +28,8 @@ use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Barryvdh\DomPDF\Facade\PDF as PDF;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class MCQsController extends Controller
 {
@@ -176,10 +178,17 @@ class MCQsController extends Controller
     }
     public function getChapters($subject_id)
     {
-        // Assuming your pivot table is named chapter_subject and has 'chapter_id' and 'subject_id' columns
-        $chapters = Chapter::whereHas('subjects', function ($query) use ($subject_id) {
-            $query->where('subject_id', $subject_id);
-        })->get();
+        $subjectIds = explode(',', $subject_id);
+        if(is_array($subjectIds) && count($subjectIds) > 0){
+            $chapters = Chapter::whereHas('subjects', function ($query) use ($subjectIds) {
+                $query->whereIn('subject_id', $subjectIds);
+            })->get();
+        } else {
+            $chapters = Chapter::whereHas('subjects', function ($query) use ($subject_id) {
+                $query->where('subject_id', $subject_id);
+            })->get();
+        }
+        
 
         return response()->json($chapters);
     }
@@ -424,6 +433,15 @@ class MCQsController extends Controller
         return $pdf->download('mcqs.pdf');
     }
 
+    public function generatePDFUsingAjax($mcqs)
+    {
+        $pdf = PDF::loadView('mcqs-question.mcqs_book_format_pdf', compact('mcqs'));
+        $pdfPath = public_path('downloads/mcqs.pdf');
+        $pdf->save($pdfPath);
+
+        return $pdfPath; 
+    }
+
     public function viewBookFormatPDF(){
         $mcqs = MCQs::all();
     
@@ -449,5 +467,84 @@ class MCQsController extends Controller
     public function testFormat()
     {
         
+    }
+
+    public function getBookFormatPdf(Request $request)
+    { 
+        $rules = [
+            'country_id' => 'required',
+            'board_id' => 'required',
+            'class_id' => 'required',
+            'select_pathern' => 'required|in:chapter_wise,grand_test,mock_test',
+            'subject_id' => 'required',
+        ];
+    
+        if ($request->select_pathern == 'chapter_wise') {
+            $rules['chapter_id'] = 'required|array';
+            $rules['chapterWiseMcqs'] = 'required|string';
+        }
+    
+        if ($request->select_pathern == 'grand_test') {
+            $rules['grandTestChapters'] = 'required|array';
+            $rules['grandTestTopics'] = 'required';
+            $rules['numGrandTests'] = 'required|integer';
+            $rules['questionsPerGrandTest'] = 'required|integer';
+            $rules['questionsPerSubjectGrandTest'] = 'required|integer';
+        }
+    
+        if ($request->select_pathern == 'mock_test') {
+            $rules['numMockTests'] = 'required|integer';
+            $rules['questionsPerMockTest'] = 'required|integer';
+            $rules['questionsPerSubjectMockTest'] = 'required|integer';
+        }
+    
+        $validatedData = $request->validate($rules);
+        $mcqs = collect();
+    
+        if ($request->select_pathern == 'chapter_wise') {
+            $mcqs = MCQs::whereIn('chapter_id', $validatedData['chapter_id'])->inRandomOrder()->get();
+        }
+    
+        if ($request->select_pathern == 'grand_test') {
+            $mcqs = MCQs::whereIn('chapter_id', $validatedData['grandTestChapters'])
+                        ->inRandomOrder()
+                        ->take($validatedData['questionsPerGrandTest'])
+                        ->get();
+        }
+    
+        if ($request->select_pathern == 'mock_test') {
+            $mcqs = MCQs::inRandomOrder()
+                        ->take($validatedData['questionsPerMockTest'])
+                        ->get();
+        }
+        if($mcqs->count() > 0){
+            $mcqs = $mcqs->map(function ($mcq) {
+                $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+                $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+                return $mcq;
+            });
+        
+            // Generate PDF
+            $pdf = PDF::loadView('mcqs-question.mcqs_book_format_pdf', compact('mcqs'));
+        
+            $directoryPath = storage_path('app/public/mcqs-pdfs');
+        
+            if (File::exists($directoryPath)) {
+                File::cleanDirectory($directoryPath);
+            } else {
+                File::makeDirectory($directoryPath, 0755, true);
+            }
+        
+            $fileName = 'mcqs-' . time() . '.pdf';
+            $filePath = $directoryPath . '/' . $fileName;
+            $pdf->save($filePath);
+        
+            $pdfUrl = Storage::url('mcqs-pdfs/' . $fileName);
+        
+            return response()->json(['success'=> true, 'pdf_url' => $pdfUrl]);
+
+        } else {
+            return response()->json(['success'=> false]);
+        }
     }
 }

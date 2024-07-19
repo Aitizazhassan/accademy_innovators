@@ -14,7 +14,7 @@
     <div class="content">
         <!-- Dynamic Table Responsive -->
         <div class="block block-bordered block-rounded">
-            <form method="POST" action="{{ route('mcqs.store') }}">
+            <form id="mcqsBookFormatForm">
                 @csrf
                 <div class="row push p-sm-2 p-lg-4">
                     <!-- Country Name Selection -->
@@ -38,7 +38,7 @@
                     <!-- Board Name Selection -->
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="board_id">Board Name</label>
+                            <label class="form-label" for="board_id">Board </label>
                             <select name="board_id" id="board_id" class="form-control form-control-sm select2-single">
                                 <option value="">Select Board</option>
                             </select>
@@ -49,7 +49,7 @@
                     <!-- Class Name Selection -->
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="class_id">Class Name</label>
+                            <label class="form-label" for="class_id">Class </label>
                             <select name="class_id" id="class_id" class="form-control form-control-sm select2-single">
                                 <option value="">Select Class</option>
                             </select>
@@ -58,10 +58,11 @@
                     </div>
 
                     <!-- select pathern-->
-                    <div class="col-xl-6 order-xl-0">
+                    <div class="col-xl-6 order-xl-0 pathernSelectField" style="display: none;">
                         <div class="mb-4">
                             <label class="form-label" for="select_pathern">Pathern</label>
                             <select name="select_pathern" id="select_pathern" class="form-control form-control-sm select2-single">
+                                <option value="">Select Pathern</option>
                                 <option value="chapter_wise">Chapter Wise</option>
                                 <option value="grand_test">Grand Test</option>
                                 <option value="mock_test">MOCK TEST</option>
@@ -70,15 +71,82 @@
                         </div>
                     </div>
 
-                    <!-- Subject Name Selection -->
-                    <div class="col-xl-4 order-xl-0">
+                    <!-- Subject Selection -->
+                    <div class="col-xl-4 order-xl-0 subjectSelectField" style="display: none;">
                         <div class="mb-4">
-                            <label class="form-label" for="subject_id">Select Subject</label>
+                            <label class="form-label" for="subject_id">Subject</label>
                             <select name="subject_id" id="subject_id" class="form-control form-control-sm select2-single">
+                                <option value="">Select Subject</option>
                             </select>
                             <x-input-error :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
                     </div>
+
+                    <!-- Chapter Wise Specific Fields -->
+                    <div id="chapterWiseFields" class="col-xl-12 patternFields" style="display: none;">
+                        <div class="mb-4">
+                            <div class="row push">
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Select Chapters (Multiple):</label>
+                                    <select name="chapter_id[]" id="chapter_id" multiple class="form-control form-control-sm select2-single"></select>
+                                </div>
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Input Chapter wise Mcqs:</label>
+                                    <input type="text" name="chapterWiseMcqs" id="chapterWiseMcqs" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Grand Test Specific Fields -->
+                    <div id="grandTestFields" class="col-xl-12 patternFields" style="display: none;">
+                        <div class="mb-4">
+                            <div class="row push">
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Select Specific Chapters (Multiple):</label>
+                                    <select name="grandTestChapters[]" id="grandTestChapters" multiple class="form-control form-control-sm select2-single"></select>
+                                </div>
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Random Selection of Topics:</label>
+                                    <input type="text" name="grandTestTopics" id="grandTestTopics" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Number of Grand Tests per Book:</label>
+                                    <input type="number" name="numGrandTests" id="numGrandTests" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Number of Questions per Grand Test:</label>
+                                    <input type="number" name="questionsPerGrandTest" id="questionsPerGrandTest" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Number of Questions per Subject:</label>
+                                    <input type="number" name="questionsPerSubjectGrandTest" id="questionsPerSubjectGrandTest" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mock Test Specific Fields -->
+                    <div id="mockTestFields" class="col-xl-12 patternFields" style="display: none;">
+                        <div class="mb-4">
+                            <div class="row push">
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Number of Mock Tests per Book:</label>
+                                    <input type="number" name="numMockTests" id="numMockTests" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Number of Questions per Mock Test:</label>
+                                    <input type="number" name="questionsPerMockTest" id="questionsPerMockTest" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-xl-6 order-xl-0">
+                                    <label class="form-label">Number of Questions per Subject:</label>
+                                    <input type="number" name="questionsPerSubjectMockTest" id="questionsPerSubjectMockTest" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     <!-- Chapter Name Selection -->
                     {{-- <div class="col-xl-4 order-xl-0">
@@ -104,7 +172,7 @@
 
                     <!-- Submit Button -->
                     <div class="mb-4">
-                        <button type="submit" class="btn btn-alt-primary">
+                        <button type="submit" class="btn btn-alt-primary get-mcqs-selection">
                             <i class="fa fa-check-circle opacity-50 me-1"></i> Get MCQS
                         </button>
                     </div>
@@ -142,7 +210,7 @@
                                 '">' + value.name + '</option>');
                         });
                         $('#class_id').empty().append(
-                            '<option value="">Select Subject</option>');
+                            '<option value="">Select Class</option>');
                         $('#subject_id').empty().append(
                             '<option value="">Select Subject</option>');
                         $('#chapter_id').empty().append(
@@ -196,8 +264,8 @@
                     url: getSubjectsUrl.replace(':class_id', classId),
                     type: 'GET',
                     success: function(data) {
-                        // $('#subject_id').empty().append(
-                        //     '<option value="">Select Subject</option>');
+                        $('#subject_id').empty().append(
+                            '<option value="">Select Subject</option>');
                         $.each(data, function(key, value) {
                             $('#subject_id').append('<option value="' + value.id +
                                 '">' + value.name + '</option>');
@@ -206,6 +274,9 @@
                             '<option value="">Select Chapter</option>');
                         $('#topic_id').empty().append(
                             '<option value="">Select Topic</option>');
+                        $('.pathernSelectField').show();    
+                        // $('.subjectSelectField').show(); 
+                        $('.select2-single').select2();
                     }
                 });
             } else {
@@ -217,46 +288,61 @@
 
         $('#subject_id').change(function() {
             var subjectId = $(this).val();
+            var selectedPathern = $('#select_pathern').val();
             if (subjectId) {
                 $.ajax({
                     url: getChaptersUrl.replace(':subject_id', subjectId),
                     type: 'GET',
                     success: function(data) {
-                        $('#chapter_id').empty().append(
-                            '<option value="">Select Chapter</option>');
-                        $.each(data, function(key, value) {
-                            $('#chapter_id').append('<option value="' + value.id +
-                                '">' + value.name + '</option>');
-                        });
-                        $('#topic_id').empty().append(
-                            '<option value="">Select Topic</option>');
+                        if(selectedPathern == 'chapter_wise'){
+                            $('#chapter_id').empty().append(
+                                '<option value="">Select Chapter</option>');
+                            $.each(data, function(key, value) {
+                                $('#chapter_id').append('<option value="' + value.id +
+                                    '">' + value.name + '</option>');
+                            });
+                        } else if(selectedPathern == 'grand_test'){
+                            $('#grandTestChapters').empty().append(
+                                '<option value="">Select Chapter</option>');
+                            $.each(data, function(key, value) {
+                                $('#grandTestChapters').append('<option value="' + value.id +
+                                    '">' + value.name + '</option>');
+                            });
+                        } else if(selectedPathern == 'mock_test'){
+
+                        }
+                        $('.select2-single').select2();
+                    },
+                    error: function(error){
+                        $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                        $('#grandTestChapters').empty().append('<option value="">Select Chapter</option>');
                     }
                 });
             } else {
                 $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
-                $('#topic_id').empty().append('<option value="">Select Topic</option>');
+                $('#grandTestChapters').empty().append('<option value="">Select Chapter</option>');
             }
         });
 
-        $('#chapter_id').change(function() {
-            var chapterId = $(this).val();
-            if (chapterId) {
-                $.ajax({
-                    url: getTopicsUrl.replace(':chapter_id', chapterId),
-                    type: 'GET',
-                    success: function(data) {
-                        $('#topic_id').empty().append(
-                            '<option value="">Select Topic</option>');
-                        $.each(data, function(key, value) {
-                            $('#topic_id').append('<option value="' + value.id +
-                                '">' + value.name + '</option>');
-                        });
-                    }
-                });
-            } else {
-                $('#topic_id').empty().append('<option value="">Select Topic</option>');
-            }
-        });
+        // $('#chapter_id').change(function() {
+        //     var chapterId = $(this).val();
+        //     if (chapterId) {
+        //         $.ajax({
+        //             url: getTopicsUrl.replace(':chapter_id', chapterId),
+        //             type: 'GET',
+        //             success: function(data) {
+        //                 $('#topic_id').empty().append(
+        //                     '<option value="">Select Topic</option>');
+        //                 $.each(data, function(key, value) {
+        //                     $('#topic_id').append('<option value="' + value.id +
+        //                         '">' + value.name + '</option>');
+        //                 });
+        //             }
+        //         });
+        //     } else {
+        //         $('#topic_id').empty().append('<option value="">Select Topic</option>');
+        //     }
+        // });
 
         $('#select_pathern').change(function(e) {
             e.preventDefault();
@@ -264,31 +350,68 @@
             var subjectSelect = $('#subject_id');
             var classId = $('#class_id').val();
 
-            subjectSelect.empty(); // Clear existing options
+            subjectSelect.empty();
             // subjectSelect.append('<option value="">Select Subject</option>');
+            $('.patternFields').hide();
 
             // Fetch and populate subjects
             getSubjects(classId, function(subjects) {
                 switch (selectedPathern) {
                     case 'chapter_wise':
-                        subjectSelect.attr('multiple', false); // Single select
+                        subjectSelect.attr('multiple', false);
+                        $('#chapterWiseFields').show();
                         break;
                     case 'grand_test':
-                        subjectSelect.attr('multiple', 'multiple'); // Multiple select
+                        subjectSelect.attr('multiple', 'multiple');
+                        subjectSelect.attr('name', 'subject_id[]');
+                        $('#grandTestFields').show();
                         break;
                     case 'mock_test':
-                        subjectSelect.attr('multiple', 'multiple'); // Multiple select
+                        subjectSelect.attr('multiple', 'multiple');
+                        subjectSelect.attr('name', 'subject_id[]');
+                        $('#mockTestFields').show();
                         break;
                     default:
-                        subjectSelect.attr('multiple', false); // Default to single select
+                        subjectSelect.attr('multiple', false);
                 }
-
+                subjectSelect.append('<option value="">Select Subject</option>');
                 subjects.forEach(function(subject) {
                     subjectSelect.append('<option value="' + subject.id + '">' + subject.name + '</option>');
-                });
+                });  
+                $('.subjectSelectField').show(); 
                 $('.select2-single').select2();
             });
         });
+
+        $(document).on('click', '.get-mcqs-selection', function(e) {
+            e.preventDefault();
+            let formData = new FormData($('#mcqsBookFormatForm')[0]);
+                
+            $.ajax({
+                url: "{{ route('mcqs.get.bookFormatPDF') }}",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    // window.location.href = response.pdf_url;
+                    if(response.success)
+                    {
+                        window.open(response.pdf_url, '_blank');
+                    } else {
+                        showNotification('danger', 'No mcqs record found against your selected search criteria');
+                    }
+                },
+                error: function(response) {
+                    let errors = response.responseJSON.errors;
+                    for (let field in errors) {
+                        let errorMessages = errors[field].join(' ');
+                        showNotification('danger', errorMessages);
+                        // $(`input[name="${field}"], select[name="${field}"]`).next('.mt-2').text(errorMessages);
+                    }
+                }
+            });
+        })
 
         function getSubjects(classId, callback) {
             if (classId) {
@@ -306,6 +429,48 @@
             } else {
                 callback([]);
             }
+        }
+
+        function getChapters(subjectId, callback) {
+            if (subjectId) {
+                $.ajax({
+                    url: getChaptersUrl.replace(':subject_id', subjectId),
+                    type: 'GET',
+                    success: function(data) {
+                        callback(data);
+                    },
+                    error: function() {
+                        console.error('Failed to fetch subjects');
+                        callback([]);
+                    }
+                });
+            } else {
+                callback([]);
+            }
+        }
+
+        function validateForm(rowData) {
+            showNotification('danger', "Estimate Name cannot be empty.");
+                    return false;
+            var formData = decodeURIComponent(rowData.replace(/\+/g, ' '));
+            var formValues = formData.split('&');
+
+            for (var i = 0; i < formValues.length; i++) {
+                var pair = formValues[i].split('=');
+                var fieldName = decodeURIComponent(pair[0]);
+                var fieldValue = decodeURIComponent(pair[1]);
+                
+                if (fieldName === 'description' && fieldValue.length === 0) {
+                    showNotification('danger', "Estimate Name cannot be empty.");
+                    return false; 
+                }
+                // if (fieldName === 'drawing_date' && fieldValue.length === 0) {
+                //     showNotification('danger', "Please select the drawing date for estimate.");
+                //     return false; 
+                // }
+            }
+
+            return true;
         }
     }); 
 </script>
