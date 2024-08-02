@@ -20,12 +20,28 @@
                 @method('PUT')
                 <div class="row push p-sm-2 p-lg-4">
                     <div class="col-xl-6 order-xl-0">
-                        <div class="form-group">
+                        <div class="form-group mb-4">
+                            <label for="class">Class Name</label>
+                            <select name="class_id" id="class_id" class="form-control form-contol-sm select2-single" required>
+                            <option disabled value="">Select</option>
+                                @forelse ($classes as $row)
+                                    <option value="{{ $row->id }}" {{ old('class_id', $chapter->classroom->id == $row->id) ? 'selected' : '' }}>
+                                        {{ $row->name }}
+                                    </option>
+                                @empty
+                                    <option value="">No Class found</option>
+                                @endforelse
+                            </select>
+                            <x-input-error-field :messages="$errors->get('class_id')" class="mt-2" />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 order-xl-0">
+                        <div class="form-group mb-4">
                             <label for="Subject">Subject Name</label>
-                            <select name="subject_id[]" id="subject_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple" required>
+                            <select name="subject_id" id="subject_id" class="form-control form-contol-sm select2-single" required>
                             <option disabled value="">Select</option>
                                 @forelse ($subjects as $row)
-                                    <option value="{{ $row->id }}" {{ in_array($row->id, old('subject_id', $chapter->subjects->pluck('id')->toArray())) ? 'selected' : '' }}>
+                                    <option value="{{ $row->id }}" {{ old('subject_id', $chapter->subject->id == $row->id) ? 'selected' : '' }}>
                                         {{ $row->name }}
                                     </option>
                                 @empty
@@ -37,7 +53,7 @@
                     </div>
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="profile-edit-name">Subject Name</label>
+                            <label class="form-label" for="profile-edit-name">Chapter Name</label>
                             <input type="text" name="name" value="{{ old('name',$chapter->name) }}" autocomplete="name"
                                 class="form-control form-contol-sm select2" id="profile-edit-name" placeholder="Enter Name">
                             <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
@@ -60,6 +76,32 @@
 </x-app-layout>
 <script>
     $(document).ready(function() {
-$('.js-example-basic-multiple').select2();
-});
+        $('.js-example-basic-multiple').select2();
+        $('.select2-single').select2();
+        var getSubjectsUrl = "{{ route('getSubjects', ':class_id') }}";  
+
+        $('#class_id').change(function() {
+            var classId = $(this).val();
+            if (classId) {
+                $.ajax({
+                    url: getSubjectsUrl.replace(':class_id', classId),
+                    type: 'GET',
+                    success: function(data) {
+                        $('#subject_id').empty().append(
+                            '<option value="">Select Subject</option>');
+                        $.each(data, function(key, value) {
+                            $('#subject_id').append('<option value="' + value.id +
+                                '">' + value.name + '</option>');
+                        });
+                        $('#chapter_id').empty().append(
+                            '<option value="">Select Chapter</option>');
+                        $('.select2-single').select2();
+                    }
+                });
+            } else {
+                $('#subject_id').empty().append('<option value="">Select Subject</option>');
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+            }
+        });
+    });
 </script>

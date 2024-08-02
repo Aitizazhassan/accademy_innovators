@@ -20,12 +20,44 @@
                 @method('PUT')
                 <div class="row push p-sm-2 p-lg-4">
                     <div class="col-xl-6 order-xl-0">
+                        <div class="form-group mb-4">
+                            <label for="class">Select Class</label>
+                            <select name="class_id" id="class_id" class="form-control form-contol-sm select2-single" required>
+                            <option disabled value="">Select Class</option>
+                                @forelse ($classes as $row)
+                                    <option value="{{ $row->id }}" {{ old('class_id', $topic->classroom->id == $row->id) ? 'selected' : '' }}>
+                                        {{ $row->name }}
+                                    </option>
+                                @empty
+                                    <option value="">No Class found</option>
+                                @endforelse
+                            </select>
+                            <x-input-error-field :messages="$errors->get('class_id')" class="mt-2" />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 order-xl-0">
+                        <div class="form-group mb-4">
+                            <label for="Subject">Select Subject</label>
+                            <select name="subject_id" id="subject_id" class="form-control form-contol-sm select2-single" required>
+                            <option disabled value="">Select Subject</option>
+                                @forelse ($subjects as $row)
+                                    <option value="{{ $row->id }}" {{ old('subject_id', $topic->subject->id == $row->id) ? 'selected' : '' }}>
+                                        {{ $row->name }}
+                                    </option>
+                                @empty
+                                    <option value="">No subjects found</option>
+                                @endforelse
+                            </select>
+                            <x-input-error-field :messages="$errors->get('subject_id')" class="mt-2" />
+                        </div>
+                    </div>
+                    <div class="col-xl-6 order-xl-0">
                         <div class="form-group">
-                            <label for="chapters">Chapter Name</label>
-                            <select name="chapter_id[]" id="chapters" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple">
-                                <option disabled value="">Select</option>
+                            <label for="chapters">Select Chapter</label>
+                            <select name="chapter_id" id="chapter_id" class="form-control form-contol-sm select2-single" required>
+                                <option disabled value="">Select Chapter</option>
                                 @foreach ($chapters as $chapter)
-                                    <option value="{{ $chapter->id }}" {{ in_array($chapter->id, $topic->chapters->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                    <option value="{{ $chapter->id }}" {{ old('subject_id', $topic->chapter->id == $chapter->id) ? 'selected' : '' }}>
                                         {{ $chapter->name }}
                                     </option>
                                 @endforeach
@@ -58,7 +90,63 @@
 
 </x-app-layout>
 <script>
-    $(document).ready(function() {
-$('.js-example-basic-multiple').select2();
-});
+   $(document).ready(function() {
+        $('.js-example-basic-multiple').select2();
+        $('.select2-single').select2();
+        var getSubjectsUrl = "{{ route('getSubjects', ':class_id') }}";
+        var getChaptersUrl = "{{ route('getChapters', ':subject_id') }}";
+
+        $('#class_id').change(function() {
+            var classId = $(this).val();
+            if (classId) {
+                $.ajax({
+                    url: getSubjectsUrl.replace(':class_id', classId),
+                    type: 'GET',
+                    success: function(data) {
+                        $('#subject_id').empty().append(
+                            '<option value="">Select Subject</option>');
+                        $.each(data, function(key, value) {
+                            $('#subject_id').append('<option value="' + value.id +
+                                '">' + value.name + '</option>');
+                        });
+                        $('#chapter_id').empty().append(
+                            '<option value="">Select Chapter</option>');
+                        $('.select2-single').select2();
+                    }
+                });
+            } else {
+                $('#subject_id').empty().append('<option value="">Select Subject</option>');
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+            }
+        });
+        
+        $('#subject_id').change(function() {
+            var subjectId = $(this).val();
+            if (subjectId) {
+                $.ajax({
+                    url: getChaptersUrl.replace(':subject_id', subjectId),
+                    type: 'GET',
+                    success: function(data) {
+                        
+                        $('#chapter_id').empty().append(
+                            '<option value="">Select Chapter</option>');
+                        $.each(data, function(key, value) {
+                            $('#chapter_id').append('<option value="' + value.id +
+                                '">' + value.name + '</option>');
+                        });
+                        // $('#topic_id').empty().append(
+                        //     '<option value="">Select Chapter</option>');
+                        $('.select2-single').select2();
+                    },
+                    error: function(error){
+                        $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                        // $('#topic_id').empty().append('<option value="">Select Topic</option>');
+                    }
+                });
+            } else {
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                // $('#topic_id').empty().append('<option value="">Select Topic</option>');
+            }
+        });
+    });
 </script>

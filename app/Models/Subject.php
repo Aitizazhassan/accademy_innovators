@@ -61,4 +61,9 @@ class Subject extends Model
         return $this->hasMany(Chapter::class);
     }
 
+    public function mcqs()
+    {
+        return $this->hasManyThrough(Mcqs::class, Chapter::class);
+    }
+
 }

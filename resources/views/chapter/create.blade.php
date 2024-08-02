@@ -19,24 +19,39 @@
             <form method="POST" action="{{ route('chapter.store') }}">
                 @csrf
                 <div class="row push p-sm-2 p-lg-4">
+                     <!-- Class Name Selection -->
+                     <div class="col-xl-6 order-xl-0">
+                        <div class="mb-4">
+                            <label class="form-label" for="class_id">Class </label>
+                            <select name="class_id" id="class_id" class="form-control form-control-sm select2-single" required>
+                                <option value="">Select Class</option>
+                                @forelse ($classes as $row)
+                                    <option value="{{ $row->id }}" {{ old('class_id') == $row->id ? 'selected' : '' }}>{{ $row->name }}</option>
+                                @empty
+                                    <option value="">No class found</option>
+                                @endforelse
+                            </select>
+                            <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
+                        </div>
+                    </div>
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="profile-edit-name">Subject Name</label>
-                           <select name="subject_id[]" id="classroom_id" class="form-control form-contol-sm select2 js-example-basic-multiple" multiple="multiple" required>
-                                <option disabled value="">select</option>
-                                @forelse ($subjects as $row)
+                           <select name="subject_id" id="subject_id" class="form-control form-contol-sm select2-single" required>
+                                <option disabled value="">Select Subject</option>
+                                {{-- @forelse ($subjects as $row)
                                     <option value="{{ $row->id }}" {{ old('subject_id') == $row->id?'selected':'' }}>{{ $row->name }}</option>
                                 @empty
                                     <option value="">No subject found</option>
-                                @endforelse
+                                @endforelse --}}
                             </select>
-                            <x-input-error-field :messages="$errors->get('borad_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
                     </div>
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="chapter-names">Chapter Name</label>
-                            <select name="name[]" id="chapter-names" class="form-control select2-multiple" multiple="multiple"></select>
+                            <select name="name[]" id="chapter-names" class="form-control select2-multiple" multiple="multiple" required></select>
                             <x-input-error-field :messages="$errors->get('name')" class="mt-2" />
                         </div>
                     </div>
@@ -57,9 +72,13 @@
 </x-app-layout>
 <script>
     $(document).ready(function() {
-$('.js-example-basic-multiple').select2();
-});
-$(document).ready(function() {
+        $('.js-example-basic-multiple').select2();
+        $('.select2-single').select2();
+    });
+
+    $(document).ready(function() {
+        var getSubjectsUrl = "{{ route('getSubjects', ':class_id') }}";
+        var getChaptersUrl = "{{ route('getChapters', ':subject_id') }}";
         $('#chapter-select').select2();
 
         $('#chapter-names').select2({
@@ -76,6 +95,34 @@ $(document).ready(function() {
                     text: term,
                     newTag: true // add additional parameters
                 };
+            }
+        });
+
+        $('#class_id').change(function() {
+            var classId = $(this).val();
+            if (classId) {
+                $.ajax({
+                    url: getSubjectsUrl.replace(':class_id', classId),
+                    type: 'GET',
+                    success: function(data) {
+                        $('#subject_id').empty().append(
+                            '<option value="">Select Subject</option>');
+                        $.each(data, function(key, value) {
+                            $('#subject_id').append('<option value="' + value.id +
+                                '">' + value.name + '</option>');
+                        });
+                        $('#chapter_id').empty().append(
+                            '<option value="">Select Chapter</option>');
+                        $('.select2-single').select2();
+                    },
+                    error: function(error){
+                        $('#subject_id').empty().append('<option value="">Select Subject</option>');
+                        $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                    }
+                });
+            } else {
+                $('#subject_id').empty().append('<option value="">Select Subject</option>');
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
             }
         });
     });

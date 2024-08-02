@@ -24,4 +24,9 @@ class Board extends Model
         return $this->hasMany(Classroom::class);
     }
 
+    public function classrooms()
+    {
+        return $this->belongsToMany(Classroom::class, 'board_classroom', 'board_id', 'classroom_id');
+    }
+
 }

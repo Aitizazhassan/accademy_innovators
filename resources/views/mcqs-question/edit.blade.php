@@ -18,6 +18,23 @@
                 @csrf
                 @method('PUT')
                 <div class="row push p-sm-2 p-lg-4">
+                    <!-- country Name Selection -->
+                    <div class="col-xl-6 order-xl-0">
+                        <div class="mb-4">
+                            <label class="form-label" for="country_id">Country Name</label>
+                            <select name="country_id" id="country_id" class="form-control form-control-sm select2-single">
+                                <option value="">Select Country</option>
+                                @forelse ($countries as $row)
+                                    <option value="{{ $row->id }}" {{ old('country_id', $mcq->country_id) == $row->id ? 'selected' : '' }}>
+                                        {{ $row->name }}
+                                    </option>
+                                @empty
+                                    <option value="">No Board found</option>
+                                @endforelse
+                            </select>
+                            <x-input-error :messages="$errors->get('country_id')" class="mt-2" />
+                        </div>
+                    </div>
                     <div class="col-xl-6">
                         <div class="mb-4">
                             <label class="form-label" for="board_id">Board Name</label>
@@ -46,7 +63,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-xl-4">
+                    <div class="col-xl-6">
                         <div class="mb-4">
                             <label class="form-label" for="subject_id">Subject Name</label>
                             <select name="subject_id" id="subject_id"
@@ -61,7 +78,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-xl-4">
+                    <div class="col-xl-6">
                         <div class="mb-4">
                             <label class="form-label" for="chapter_id">Chapter Name</label>
                             <select name="chapter_id" id="chapter_id"
@@ -76,7 +93,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-xl-4">
+                    <div class="col-xl-6">
                         <div class="mb-4">
                             <label class="form-label" for="topic_id">Topic Name</label>
                             <select name="topic_id" id="topic_id" class="form-control form-control-sm select2-single">
@@ -236,10 +253,43 @@
 $(document).ready(function() {
     $('.select2-single').select2();
 
+    var getBoardUrl = "{{ route('getBoards', ':country_id') }}";
     var getClassUrl = "{{ route('getClass', ':board_id') }}";
     var getSubjectsUrl = "{{ route('getSubjects', ':class_id') }}";
     var getChaptersUrl = "{{ route('getChapters', ':subject_id') }}";
     var getTopicsUrl = "{{ route('getTopics', ':chapter_id') }}";
+
+    $('#country_id').change(function() {
+        var countryId = $(this).val();
+        if (countryId) {
+            $.ajax({
+                url: getBoardUrl.replace(':country_id', countryId),
+                type: 'GET',
+                success: function(data) {
+                    $('#board_id').empty().append(
+                        '<option value="">Select Board</option>');
+                    $.each(data, function(key, value) {
+                        $('#board_id').append('<option value="' + value.id +
+                            '">' + value.name + '</option>');
+                    });
+                    $('#class_id').empty().append(
+                        '<option value="">Select Subject</option>');
+                    $('#subject_id').empty().append(
+                        '<option value="">Select Subject</option>');
+                    $('#chapter_id').empty().append(
+                        '<option value="">Select Chapter</option>');
+                    $('#topic_id').empty().append(
+                        '<option value="">Select Topic</option>');
+                }
+            });
+        } else {
+            $('#board_id').empty().append('<option value="">Select Board</option>');
+            $('#class_id').empty().append('<option value="">Select Class</option>');
+            $('#subject_id').empty().append('<option value="">Select Subject</option>');
+            $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+            $('#topic_id').empty().append('<option value="">Select Topic</option>');
+        }
+    });
 
     $('#board_id').change(function() {
         var boardId = $(this).val();

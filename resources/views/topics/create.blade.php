@@ -19,19 +19,42 @@
             <form method="POST" action="{{ route('topic.store') }}">
                 @csrf
                 <div class="row push p-sm-2 p-lg-4">
+                    <!-- Class Name Selection -->
+                    <div class="col-xl-6 order-xl-0">
+                       <div class="mb-4">
+                           <label class="form-label" for="class_id">Class </label>
+                           <select name="class_id" id="class_id" class="form-control form-control-sm select2-single" required>
+                               <option value="">Select Class</option>
+                               @forelse ($classes as $row)
+                                   <option value="{{ $row->id }}" {{ old('class_id') == $row->id ? 'selected' : '' }}>{{ $row->name }}</option>
+                               @empty
+                                   <option value="">No class found</option>
+                               @endforelse
+                           </select>
+                           <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
+                       </div>
+                   </div>
+                   <div class="col-xl-6 order-xl-0">
+                       <div class="mb-4">
+                           <label class="form-label" for="profile-edit-name">Subject Name</label>
+                          <select name="subject_id" id="subject_id" class="form-control form-contol-sm select2-single" required>
+                               <option disabled value="">Select Subject</option>
+                           </select>
+                           <x-input-error-field :messages="$errors->get('subject_id')" class="mt-2" />
+                       </div>
+                   </div>
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="profile-edit-name">Chapter Name</label>
-                            <select name="chapter_id[]" id="classroom_id"
-                                class="form-control form-contol-sm select2 js-example-basic-multiple"
-                                multiple="multiple">
-                                <option value="">select</option>
-                                @forelse ($topic as $row)
+                            <select name="chapter_id" id="chapter_id"
+                                class="form-control form-contol-sm select2-single" required>
+                                <option value="">select Chapter</option>
+                                {{-- @forelse ($topic as $row)
                                     <option value="{{ $row->id }}"
                                         {{ old('chapter_id') == $row->id ? 'selected' : '' }}>{{ $row->name }}</option>
                                 @empty
                                     <option value="">No subject found</option>
-                                @endforelse
+                                @endforelse --}}
                             </select>
                             <x-input-error-field :messages="$errors->get('chapter_id')" class="mt-2" />
                         </div>
@@ -63,9 +86,12 @@
 <script>
     $(document).ready(function() {
         $('.js-example-basic-multiple').select2();
+        $('.select2-single').select2();
     });
     $(document).ready(function() {
         $('#chapter-select').select2();
+        var getSubjectsUrl = "{{ route('getSubjects', ':class_id') }}";
+        var getChaptersUrl = "{{ route('getChapters', ':subject_id') }}";
 
         $('#topic-names').select2({
             tags: true,
@@ -81,6 +107,60 @@
                     text: term,
                     newTag: true // add additional parameters
                 };
+            }
+        });
+
+        $('#class_id').change(function() {
+            var classId = $(this).val();
+            if (classId) {
+                $.ajax({
+                    url: getSubjectsUrl.replace(':class_id', classId),
+                    type: 'GET',
+                    success: function(data) {
+                        $('#subject_id').empty().append(
+                            '<option value="">Select Subject</option>');
+                        $.each(data, function(key, value) {
+                            $('#subject_id').append('<option value="' + value.id +
+                                '">' + value.name + '</option>');
+                        });
+                        $('#chapter_id').empty().append(
+                            '<option value="">Select Chapter</option>');
+                        $('.select2-single').select2();
+                    }
+                });
+            } else {
+                $('#subject_id').empty().append('<option value="">Select Subject</option>');
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+            }
+        });
+        
+
+        $('#subject_id').change(function() {
+            var subjectId = $(this).val();
+            if (subjectId) {
+                $.ajax({
+                    url: getChaptersUrl.replace(':subject_id', subjectId),
+                    type: 'GET',
+                    success: function(data) {
+                        
+                        $('#chapter_id').empty().append(
+                            '<option value="">Select Chapter</option>');
+                        $.each(data, function(key, value) {
+                            $('#chapter_id').append('<option value="' + value.id +
+                                '">' + value.name + '</option>');
+                        });
+                        // $('#topic_id').empty().append(
+                        //     '<option value="">Select Chapter</option>');
+                        $('.select2-single').select2();
+                    },
+                    error: function(error){
+                        $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                        // $('#topic_id').empty().append('<option value="">Select Topic</option>');
+                    }
+                });
+            } else {
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                // $('#topic_id').empty().append('<option value="">Select Topic</option>');
             }
         });
     });

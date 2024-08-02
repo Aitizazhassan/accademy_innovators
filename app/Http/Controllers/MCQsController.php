@@ -76,26 +76,26 @@ class MCQsController extends Controller
             }
     
             $data = $query->get();
-    
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('country_name', function ($row) {
-                    return $row->country->name;
+                    return $row->country ? $row->country->name : '';
                 })
                 ->addColumn('board_name', function ($row) {
-                    return $row->board->name;
+                    return $row->board ? $row->board->name : '';
                 })
                 ->addColumn('class_name', function ($row) {
-                    return $row->class->name;
+                    return $row->class ? $row->class->name : '';
                 })
                 ->addColumn('subject_name', function ($row) {
-                    return $row->subject->name;
+                    return $row->subject ? $row->subject->name : '';
                 })
                 ->addColumn('chapter_name', function ($row) {
-                    return $row->chapter->name;
+                    return $row->chapter ? $row->chapter->name : '';
                 })
                 ->addColumn('topic_name', function ($row) {
-                    return $row->topic->name;
+                    return $row->topic ? $row->topic->name : '';
                 })
                 ->addColumn('statement', function ($row) {
                     return $row->statement;
@@ -179,16 +179,20 @@ class MCQsController extends Controller
     public function getChapters($subject_id)
     {
         $subjectIds = explode(',', $subject_id);
-        if(is_array($subjectIds) && count($subjectIds) > 0){
-            $chapters = Chapter::whereHas('subjects', function ($query) use ($subjectIds) {
-                $query->whereIn('subject_id', $subjectIds);
-            })->get();
-        } else {
-            $chapters = Chapter::whereHas('subjects', function ($query) use ($subject_id) {
-                $query->where('subject_id', $subject_id);
-            })->get();
-        }
+        $chapters = [];
         
+        if (is_array($subjectIds) && count($subjectIds) > 0) {
+            $subjects = Subject::whereIn('id', $subjectIds)->with('chapters')->get();
+            
+            foreach ($subjects as $subject) {
+                $chapters = array_merge($chapters, $subject->chapters->toArray());
+            }
+        } else {
+            $subject = Subject::with('chapters')->find($subject_id);
+            if ($subject) {
+                $chapters = $subject->chapters->toArray();
+            }
+        }
 
         return response()->json($chapters);
     }
@@ -244,18 +248,21 @@ class MCQsController extends Controller
 
     public function edit(MCQs $mcq)
     {
+        $mcq = MCQs::with('country', 'board', 'class', 'subject', 'chapter', 'topic')->find($mcq->id);
+
         $pageHead = 'Edit MCQs';
         $pageTitle = 'Edit MCQs';
         $activeMenu = 'MCQs';
 
         // Fetch all boards, classes, subjects, chapters, and topics to populate the dropdowns
-        $boards = Board::all();
-        $classes = Classroom::all(); // Assuming ClassName is the name of your class model
-        $subjects = Subject::all();
-        $chapters = Chapter::all();
-        $topics = Topic::all();
+        $countries = Country::all();
+        $boards = $mcq->country ? $mcq->country->board : collect();
+        $classes = $mcq->board ? $mcq->board->classrooms : collect();
+        $subjects = $mcq->class ? $mcq->class->subjects : collect();
+        $chapters = $mcq->subject ? $mcq->subject->chapters : collect();
+        $topics = $mcq->chapter ? $mcq->chapter->topics : collect();
 
-        return view('mcqs-question.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'mcq', 'boards', 'classes', 'subjects', 'chapters', 'topics'));
+        return view('mcqs-question.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'mcq', 'countries', 'boards', 'classes', 'subjects', 'chapters', 'topics'));
     }
 
 
@@ -276,7 +283,6 @@ class MCQsController extends Controller
             'solution_link_english' => 'nullable|string',
             'solution_link_urdu' => 'nullable|string',
         ]);
-
         $mcq->update($validated);
 
         return redirect()->route('mcqs.index')->with('success', 'MCQ updated successfully.');
@@ -500,51 +506,249 @@ class MCQsController extends Controller
     
         $validatedData = $request->validate($rules);
         $mcqs = collect();
-    
-        if ($request->select_pathern == 'chapter_wise') {
-            $mcqs = MCQs::whereIn('chapter_id', $validatedData['chapter_id'])->inRandomOrder()->get();
+
+        $type = $request->input('select_pathern');
+
+        $subjects = $request->input('subject_id', []);
+        $chapters = $request->input('chapter_id', []);
+        $numGrandTests = $request->input('num_grand_tests', 0);
+        $numQuestionsPerTest = $request->input('num_questions_per_test', 0);
+        $numQuestionsPerSubject = $request->input('num_questions_per_subject', 0);
+        $numMockTests = $request->input('num_mock_tests', 0);
+        $numQuestionsPerMockTest = $request->input('num_questions_per_mock_test', 0);
+
+        switch ($type) {
+            case 'chapter_wise':
+                return $this->generateChapterwisePdf($subjects, $chapters, $request->chapterWiseMcqs);
+                break;
+
+            case 'grand_test':
+                return $this->generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters);
+                break;
+
+            case 'mock_test':
+                return $this->generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $numQuestionsPerSubject, $subjects);
+                break;
+
+            default:
+                return response()->json(['success' => false, 'message' => 'Invalid PDF type']);
         }
-    
-        if ($request->select_pathern == 'grand_test') {
-            $mcqs = MCQs::whereIn('chapter_id', $validatedData['grandTestChapters'])
-                        ->inRandomOrder()
-                        ->take($validatedData['questionsPerGrandTest'])
-                        ->get();
-        }
-    
-        if ($request->select_pathern == 'mock_test') {
-            $mcqs = MCQs::inRandomOrder()
-                        ->take($validatedData['questionsPerMockTest'])
-                        ->get();
-        }
-        if($mcqs->count() > 0){
-            $mcqs = $mcqs->map(function ($mcq) {
-                $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
-                $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
-                return $mcq;
+
+        // if ($mcqs) {
+        //     $mcqs = collect($mcqs)->map(function ($subject) {
+        //         return collect($subject)->map(function ($chapter) {
+        //             return $chapter->map(function ($mcq) {
+        //                 $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+        //                 $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+        //                 return $mcq;
+        //             });
+        //         });
+        //     });
+
+        //     $pdf = PDF::loadView('mcqs-question.mcqs_book_format_pdf', compact('mcqs'));
+
+        //     $directoryPath = storage_path('app/public/mcqs-pdfs');
+
+        //     if (File::exists($directoryPath)) {
+        //         File::cleanDirectory($directoryPath);
+        //     } else {
+        //         File::makeDirectory($directoryPath, 0755, true);
+        //     }
+
+        //     $fileName = 'mcqs-' . time() . '.pdf';
+        //     $filePath = $directoryPath . '/' . $fileName;
+        //     $pdf->save($filePath);
+
+        //     $pdfUrl = Storage::url('mcqs-pdfs/' . $fileName);
+
+        //     return response()->json(['success' => true, 'pdf_url' => $pdfUrl]);
+        // } else {
+        //     return response()->json(['success' => false]);
+        // }
+    }
+
+
+
+    private function generateChapterwisePdf($subject, $chapters, $takeMcqs)
+    {
+        // Fetch MCQs based on the selected subjects and chapters
+        $subject = Subject::find($subject);
+        $mcqs = $this->getMCQsForChapters($subject, $chapters, $takeMcqs);
+        if ($mcqs) {
+            $mcqs = collect($mcqs)->map(function ($subject) {
+                return collect($subject)->map(function ($chapter) {
+                    return $chapter->map(function ($mcq) {
+                        $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+                        $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+                        return $mcq;
+                    });
+                });
             });
-        
-            // Generate PDF
-            $pdf = PDF::loadView('mcqs-question.mcqs_book_format_pdf', compact('mcqs'));
-        
+            $pdf = PDF::loadView('mcqs-question.pdf.chapterwise', compact('subject', 'chapters', 'mcqs'));
             $directoryPath = storage_path('app/public/mcqs-pdfs');
-        
+
             if (File::exists($directoryPath)) {
                 File::cleanDirectory($directoryPath);
             } else {
                 File::makeDirectory($directoryPath, 0755, true);
             }
-        
+
             $fileName = 'mcqs-' . time() . '.pdf';
             $filePath = $directoryPath . '/' . $fileName;
             $pdf->save($filePath);
-        
-            $pdfUrl = Storage::url('mcqs-pdfs/' . $fileName);
-        
-            return response()->json(['success'=> true, 'pdf_url' => $pdfUrl]);
 
+            $pdfUrl = Storage::url('mcqs-pdfs/' . $fileName);
+
+            return response()->json(['success' => true, 'pdf_url' => $pdfUrl]);
         } else {
-            return response()->json(['success'=> false]);
+            return response()->json(['success' => false]);
         }
+    }
+
+    private function generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters)
+    {
+        // Fetch MCQs based on the selected subjects and chapters
+        $mcqs = $this->getMCQsForGrandTest($subjects, $chapters, $numQuestionsPerTest, $numQuestionsPerSubject);
+
+        if ($mcqs) {
+            $mcqs = collect($mcqs)->map(function ($subject) {
+                return collect($subject)->map(function ($chapter) {
+                    return $chapter->map(function ($mcq) {
+                        $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+                        $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+                        return $mcq;
+                    });
+                });
+            });
+
+        
+           $pdf = PDF::loadView('pdf.grandtest', compact('numGrandTests', 'numQuestionsPerTest', 'numQuestionsPerSubject', 'subjects', 'chapters', 'mcqs'));
+
+            $directoryPath = storage_path('app/public/mcqs-pdfs');
+
+            if (File::exists($directoryPath)) {
+                File::cleanDirectory($directoryPath);
+            } else {
+                File::makeDirectory($directoryPath, 0755, true);
+            }
+
+            $fileName = 'mcqs-' . time() . '.pdf';
+            $filePath = $directoryPath . '/' . $fileName;
+            $pdf->save($filePath);
+
+            $pdfUrl = Storage::url('mcqs-pdfs/' . $fileName);
+
+            return response()->json(['success' => true, 'pdf_url' => $pdfUrl]);
+        } else {
+            return response()->json(['success' => false]);
+        }
+    }
+
+    private function generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $numQuestionsPerSubject, $subjects)
+    {
+        // Fetch MCQs based on the selected subjects
+        $mcqs = $this->getMCQsForMockTest($subjects, $numQuestionsPerMockTest, $numQuestionsPerSubject);
+        if ($mcqs) {
+            $mcqs = collect($mcqs)->map(function ($subject) {
+                return collect($subject)->map(function ($chapter) {
+                    return $chapter->map(function ($mcq) {
+                        $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+                        $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+                        return $mcq;
+                    });
+                });
+            });
+
+            $pdf = PDF::loadView('pdf.mocktest', compact('numMockTests', 'numQuestionsPerMockTest', 'numQuestionsPerSubject', 'subjects', 'mcqs'));
+
+            $directoryPath = storage_path('app/public/mcqs-pdfs');
+
+            if (File::exists($directoryPath)) {
+                File::cleanDirectory($directoryPath);
+            } else {
+                File::makeDirectory($directoryPath, 0755, true);
+            }
+
+            $fileName = 'mcqs-' . time() . '.pdf';
+            $filePath = $directoryPath . '/' . $fileName;
+            $pdf->save($filePath);
+
+            $pdfUrl = Storage::url('mcqs-pdfs/' . $fileName);
+
+            return response()->json(['success' => true, 'pdf_url' => $pdfUrl]);
+        } else {
+            return response()->json(['success' => false]);
+        }
+    }
+
+    
+
+    private function getMCQsForChapters($subject, $chapters, $takeMcqs)
+    {
+        $mcqs = [];
+        if ($subject) {
+            foreach ($chapters as $chapterId) {
+                $chapter = Chapter::find($chapterId);
+                if ($chapter && $chapter->subject_id == $subject->id) {
+                    $mcqs[$subject->name][$chapter->name] = Mcqs::where('subject_id', $subject->id)->where('chapter_id', $chapterId)->inRandomOrder()->take($takeMcqs)->get();
+                }
+            }
+        }
+        return $mcqs;
+    }
+
+    private function getMCQsForGrandTest($subjects, $chapters, $numQuestionsPerTest, $numQuestionsPerSubject)
+    {
+        $mcqs = [];
+        
+        $totalQuestions = [];
+
+        foreach ($subjects as $subjectId) {
+            $subject = Subject::find($subjectId);
+            if ($subject) {
+                $mcqs[$subject->name] = [];
+
+                foreach ($chapters as $chapterId) {
+                    $chapter = Chapter::find($chapterId);
+                    if ($chapter && $chapter->subject_id == $subjectId) {
+                        $questions = Mcqs::where('subject_id', $subjectId)
+                            ->where('chapter_id', $chapterId)
+                            ->inRandomOrder()
+                            ->take($numQuestionsPerSubject)
+                            ->get();
+
+                        $mcqs[$subject->name][$chapter->name] = $questions;
+
+                        if (!isset($totalQuestions[$subject->name])) {
+                            $totalQuestions[$subject->name] = collect();
+                        }
+                        $totalQuestions[$subject->name] = $totalQuestions[$subject->name]->concat($questions);
+                    }
+                }
+            }
+        }
+
+        foreach ($mcqs as $subjectName => $chapters) {
+            $subjectTotalQuestions = $totalQuestions[$subjectName];
+            if ($subjectTotalQuestions->count() > $numQuestionsPerTest) {
+                $mcqs[$subjectName] = $subjectTotalQuestions->random($numQuestionsPerTest);
+            }
+        }
+
+        return $mcqs;
+    }
+
+    private function getMCQsForMockTest($subjects, $numQuestionsPerMockTest, $numQuestionsPerSubject)
+    {
+        $mcqs = [];
+        foreach ($subjects as $subjectId) {
+            $subject = Subject::find($subjectId);
+            if ($subject) {
+                $mcqs[$subject->name] = Mcqs::whereHas('chapter', function ($query) use ($subjectId) {
+                    $query->where('subject_id', $subjectId);
+                })->inRandomOrder()->take($numQuestionsPerMockTest)->get();
+            }
+        }
+        return $mcqs;
     }
 }

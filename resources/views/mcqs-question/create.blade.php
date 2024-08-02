@@ -17,12 +17,12 @@
             <form method="POST" action="{{ route('mcqs.store') }}">
                 @csrf
                 <div class="row push p-sm-2 p-lg-4">
-                    <!-- Board Name Selection -->
+                    <!-- Country Name Selection -->
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="country_id">Country Name</label>
                             <select name="country_id" id="country_id" class="form-control form-control-sm select2-single">
-                                <option value="">Select Board</option>
+                                <option value="">Select Country</option>
                                 @forelse ($countries as $row)
                                     <option value="{{ $row->id }}" {{ old('country_id') == $row->id ? 'selected' : '' }}>
                                         {{ $row->name }}

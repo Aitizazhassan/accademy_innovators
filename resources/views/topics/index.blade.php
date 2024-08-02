@@ -26,15 +26,15 @@
             <!-- Dynamic Table Responsive -->
             <div class="block block-rounded">
                 <div class="block-content block-content-full">
-                    <table class="table table-bordered table-striped table-vcenter table-sm" id="users-table">
+                    <table class="table table-bordered table-striped table-vcenter table-sm" id="topic-table">
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 80px;">{{ __('#') }}</th>
                                 <th>{{ __('Countries') }}</th>
                                 <th>{{ __('Boards') }}</th>
-                                <th>{{ __('Classrooms') }}</th>
-                                <th>{{ __('Subjects') }}</th>
-                                <th>{{ __('Chapters') }}</th>
+                                <th>{{ __('Classroom') }}</th>
+                                <th>{{ __('Subject') }}</th>
+                                <th>{{ __('Chapter') }}</th>
                                 <th style="width:10%">{{ __('Name') }}</th>
                                 <th style="width: 15%">{{ __('Date') }}</th>
                                 <th>{{ __('Actions') }}</th>
@@ -79,7 +79,7 @@
 
     <script>
         $(document).ready(function() {
-            var usersDataTable = $('#users-table').DataTable({
+            var topicDataTable = $('#topic-table').DataTable({
                 processing: true,
                 serverSide: false,
                 pagingType: "full_numbers",
@@ -102,16 +102,16 @@
                         name: 'topic_boards'
                     },
                     {
-                        data: 'topic_classrooms',
-                        name: 'topic_classrooms'
+                        data: 'topic_classroom',
+                        name: 'topic_classroom'
                     },
                     {
-                        data: 'topic_subjects',
-                        name: 'topic_subjects'
+                        data: 'topic_subject',
+                        name: 'topic_subject'
                     },
                     {
-                        data: 'topic_chapters',
-                        name: 'topic_chapters'
+                        data: 'topic_chapter',
+                        name: 'topic_chapter'
                     },
                     {
                         data: 'name',
@@ -131,12 +131,12 @@
             });
 
             // Initialize Bootstrap tooltips after DataTable is loaded
-            usersDataTable.on('draw', function() {
+            topicDataTable.on('draw', function() {
                 $('[data-bs-toggle="tooltip"]').tooltip();
             });
 
             // Delete user
-            $('#users-table').on('click', '.delete-user', function(e) {
+            $('#topic-table').on('click', '.delete-user', function(e) {
                 e.preventDefault(); // Prevent the default link behavior
 
                 var userId = $(this).data('id');
@@ -160,7 +160,7 @@
                             },
                             success: function(response) {
                                 // Reload the DataTable after successful deletion
-                                usersDataTable.ajax.reload();
+                                topicDataTable.ajax.reload();
 
                                 // Optionally, show a success message
                                 Dashmix.helpers('jq-notify', {

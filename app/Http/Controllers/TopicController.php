@@ -29,7 +29,7 @@ class TopicController extends Controller
         if ($request->ajax()) {
             $currentUserId = Auth::id();
             //$classroom = Classroom::select(['id', 'name', 'created_at']);
-            $topics = Topic::with('chapters', 'chapters.subjects', 'chapters.subjects.classrooms', 'chapters.subjects.classrooms.boards', 'chapters.subjects.classrooms.boards.countries');
+            $topics = Topic::with('chapter', 'subject', 'classroom', 'classroom.boards', 'classroom.boards.countries')->orderBy('id', 'desc');
             return Datatables::of($topics)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
@@ -39,113 +39,58 @@ class TopicController extends Controller
                 })
                 ->addColumn('topic_countries', function ($row) {
                     $countries = '';
-                    $addedCountries = [];
-
-                    if ($row->chapters) {
-                        foreach ($row->chapters as $chapter) {
-                            if ($chapter->subjects) {
-                                foreach ($chapter->subjects as $subject) {
-                                    if ($subject->classrooms) {
-                                        foreach ($subject->classrooms as $classroom) {
-                                            if ($classroom->boards) {
-                                                foreach ($classroom->boards as $board) {
-                                                    if ($board->countries) {
-                                                        foreach ($board->countries as $country) {
-                                                            if (!in_array($country->name, $addedCountries)) {
-                                                                $countries .= '<span class="badge bg-primary">' . $country->name . '</span>&nbsp;';
-                                                                $addedCountries[] = $country->name;
-                                                            }
-                                                        }
-                                                    }
-                                                }
+                    $addedCountries = []; 
+                    if ($row->classroom) {
+                            if ($row->classroom->boards) {
+                                foreach ($row->classroom->boards as $board) {
+                                    if ($board->countries) {
+                                        foreach ($board->countries as $country) {
+                                            if (!in_array($country->name, $addedCountries)) {
+                                                $countries .= '<span class="badge bg-primary">' . $country->name . '</span>&nbsp;';
+                                                $addedCountries[] = $country->name;
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
                     }
                     return $countries;
                 })
                 ->addColumn('topic_boards', function ($row) {
                     $boards = '';
                     $addedBoards = [];
-
-                    if ($row->chapters) {
-                        foreach ($row->chapters as $chapter) {
-                            if ($chapter->subjects) {
-                                foreach ($chapter->subjects as $subject) {
-                                    if ($subject->classrooms) {
-                                        foreach ($subject->classrooms as $classroom) {
-                                            if ($classroom->boards) {
-                                                foreach ($classroom->boards as $board) {
-                                                    if (!in_array($board->name, $addedBoards)) {
-                                                        $boards .= '<span class="badge bg-primary">' . $board->name . '</span>&nbsp;';
-                                                        $addedBoards[] = $board->name;
-                                                    }
-                                                }
-                                            }
-                                        }
+                    if ($row->classroom) {
+                            if ($row->classroom->boards) {
+                                foreach ($row->classroom->boards as $board) {
+                                    if (!in_array($board->name, $addedBoards)) {
+                                        $boards .= '<span class="badge bg-primary">' . $board->name . '</span>&nbsp;';
+                                        $addedBoards[] = $board->name;
                                     }
                                 }
                             }
-                        }
                     }
                     return $boards;
                 })
-                ->addColumn('topic_classrooms', function ($row) {
-                    $classrooms = '';
-                    $addedClassrooms = [];
-
-                    if ($row->chapters) {
-                        foreach ($row->chapters as $chapter) {
-                            if ($chapter->subjects) {
-                                foreach ($chapter->subjects as $subject) {
-                                    if ($subject->classrooms) {
-                                        foreach ($subject->classrooms as $classroom) {
-                                            if (!in_array($classroom->name, $addedClassrooms)) {
-                                                $classrooms .= '<span class="badge bg-primary">' . $classroom->name . '</span>&nbsp;';
-                                                $addedClassrooms[] = $classroom->name;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                ->addColumn('topic_classroom', function ($row) {
+                    $classroom = '';
+                    if ($row->classroom) {
+                        $classroom = $row->classroom->name;
                     }
-                    return $classrooms;
+                    return $classroom;
                 })
-                ->addColumn('topic_subjects', function ($row) {
-                    $subjects = '';
-                    $addedSubjects = [];
-
-                    if ($row->chapters) {
-                        foreach ($row->chapters as $chapter) {
-                            if ($chapter->subjects) {
-                                foreach ($chapter->subjects as $subject) {
-                                    if (!in_array($subject->name, $addedSubjects)) {
-                                        $subjects .= '<span class="badge bg-primary">' . $subject->name . '</span>&nbsp;';
-                                        $addedSubjects[] = $subject->name;
-                                    }
-                                }
-                            }
-                        }
+                ->addColumn('topic_subject', function ($row) {
+                    $subject = '';
+                    if ($row->subject) {
+                            $subject = $row->subject->name;
                     }
-                    return $subjects;
+                    return $subject;
                 })
-                ->addColumn('topic_chapters', function ($row) {
-                    $chapters = '';
-                    $addedChapters = [];
-
-                    if ($row->chapters) {
-                        foreach ($row->chapters as $chapter) {
-                            if (!in_array($chapter->name, $addedChapters)) {
-                                $chapters .= '<span class="badge bg-primary">' . $chapter->name . '</span>&nbsp;';
-                                $addedChapters[] = $chapter->name;
-                            }
-                        }
+                ->addColumn('topic_chapter', function ($row) {
+                    $chapter = '';
+                    if ($row->chapter) {
+                            $chapter = $row->chapter->name;
                     }
-                    return $chapters;
+                    return $chapter;
                 })
                 ->addColumn('actions', function ($row) {
                     $settingsButton = '<a href="' . route('topic.edit', $row->id) . '" class="btn btn-sm btn-alt-secondary" data-bs-toggle="tooltip" title="Edit">
@@ -158,7 +103,7 @@ class TopicController extends Controller
                     $deleteButton = Gate::check('user.delete') ? $deleteButton : '';
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'topic_countries', 'topic_boards', 'topic_classrooms', 'topic_subjects', 'topic_chapters', 'actions'])
+                ->rawColumns(['dateAdded', 'status', 'topic_countries', 'topic_boards', 'topic_classroom', 'topic_subject', 'topic_chapter', 'actions'])
                 ->make(true);
         }
         $pageHead = 'Topic';
@@ -173,9 +118,10 @@ class TopicController extends Controller
         $pageTitle = 'Create topic';
         $activeMenu = 'create_topic';
 
-        $topic = Chapter::get();
+        // $topic = Chapter::get();
+        $classes = Classroom::get();
 
-        return view('topics.create', compact('activeMenu','pageHead','pageTitle','topic'));
+        return view('topics.create', compact('activeMenu','pageHead','pageTitle', 'classes'));
 
     }
 
@@ -210,8 +156,10 @@ class TopicController extends Controller
     public function store(TopicRequest $request)
 {
     $validatedData = $request->validate([
+        'class_id' => 'required',
+        'subject_id' => 'required',
+        'chapter_id' => 'required',
         'name.*' => 'required|string',
-        'chapter_id' => 'required|array',
     ]);
 
     foreach ($validatedData['name'] as $name) {
@@ -224,11 +172,14 @@ class TopicController extends Controller
 
         // Create a new topic instance
         $topic = new Topic();
+        $topic->classroom_id =  $request->class_id;
+        $topic->subject_id =  $request->subject_id;
+        $topic->chapter_id =  $request->chapter_id;
         $topic->name = $name;
         $topic->save();
 
         // Attach chapters to the topic
-        $topic->chapters()->attach($validatedData['chapter_id']);
+        // $topic->chapters()->attach($validatedData['chapter_id']);
     }
 
     return redirect()->route('topic.index')->with('success', 'Topics created successfully.');
@@ -238,32 +189,39 @@ class TopicController extends Controller
 
     public function edit(Topic $topic)
 {
+    $topic = Topic::with('classroom', 'classroom.subjects', 'subject', 'subject.chapters')->find($topic->id);
     $pageHead = 'Edit Topic';
     $pageTitle = 'Edit Topic';
     $activeMenu = 'Topic';
-
     // Fetch all chapters to populate the dropdown
-    $chapters = Chapter::all();
+    $classes = Classroom::get();
+    $subjects = $topic->classroom->subjects;
+    $chapters = $topic->subject->chapters;
 
-    return view('topics.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'topic', 'chapters'));
+    return view('topics.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'topic', 'classes', 'subjects', 'chapters'));
 }
 
     public function update(TopicRequest $request, Topic $topic)
     {
 
         $validatedData = $request->validate([
-            'name' => 'required|string',
-            'chapter_id' => 'required|array',
+            'class_id' => 'required',
+            'subject_id' => 'required',
+            'chapter_id' => 'required',
+            'name.*' => 'required|string',
         ]);
          // Validate the incoming request data
          $validatedData = $request->validated();
 
          // Update session name
          $topic->name = $validatedData['name'];
+         $topic->classroom_id =  $request->class_id;
+         $topic->subject_id =  $request->subject_id;
+         $topic->chapter_id =  $request->chapter_id;
          $topic->save();
 
          // Sync campuses for the session
-         $topic->chapters()->sync($validatedData['chapter_id']);
+        //  $topic->chapters()->sync($validatedData['chapter_id']);
 
         return redirect()->route('topic.index')->with('success', 'Topic updated successfully.');
 

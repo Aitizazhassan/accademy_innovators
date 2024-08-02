@@ -25,16 +25,24 @@ class Topic extends Model
     {
         return $this->belongsTo(Subject::class);
     }
+    
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
+    public function chapter()
+    {
+        return $this->belongsTo(Chapter::class);
+    }
+
     // public function chapters()
     // {
     //     return $this->belongsToMany(Chapter::class, 'topic_chapter', 'topic_id','chapter_id');
     // }
+    
     public function chapters()
     {
         return $this->belongsToMany(Chapter::class, 'topic_chapter', 'topic_id', 'chapter_id');
-    }
-    public function chapter()
-    {
-        return $this->belongsTo(Chapter::class);
     }
 }
