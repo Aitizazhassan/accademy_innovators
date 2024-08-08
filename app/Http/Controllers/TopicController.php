@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Session;
 class TopicController extends Controller
 {
 
@@ -162,27 +162,51 @@ class TopicController extends Controller
         'name.*' => 'required|string',
     ]);
 
-    foreach ($validatedData['name'] as $name) {
-        // Check if a topic with the same name already exists
-        $existingTopic = Topic::where('name', $name)->first();
-        if ($existingTopic) {
-            // If a topic with the same name already exists, return with error message
-            return redirect()->back()->with('error', "A Topic with the name '{$name}' already exists.");
+    // foreach ($validatedData['name'] as $name) {
+    //     // Check if a topic with the same name already exists
+    //     $existingTopic = Topic::where('name', $name)->first();
+    //     if ($existingTopic) {
+    //         // If a topic with the same name already exists, return with error message
+    //         return redirect()->back()->with('error', "A Topic with the name '{$name}' already exists.");
+    //     }
+
+    //     // Create a new topic instance
+    //     $topic = new Topic();
+    //     $topic->classroom_id =  $request->class_id;
+    //     $topic->subject_id =  $request->subject_id;
+    //     $topic->chapter_id =  $request->chapter_id;
+    //     $topic->name = $name;
+    //     $topic->save();
+
+    //     // Attach chapters to the topic
+    //     // $topic->chapters()->attach($validatedData['chapter_id']);
+    // }
+
+    foreach ($validatedData['class_id'] as $classId) {
+
+        foreach ($validatedData['name'] as $name) {
+            $existingTopic = Topic::where('name', $name)->where('classroom_id', $classId)->where('subject_id', $request->subject_id)->where('chapter_id', $request->chapter_id)->first();
+            if ($existingTopic) {
+                Session::flash('error', "A Topic with the name '{$name}' against such class and subject already exists.");
+            } else {
+
+                // Create a new topic instance
+                $topic = new Topic();
+                $topic->classroom_id =  $classId;
+                $topic->subject_id =  $request->subject_id;
+                $topic->chapter_id =  $request->chapter_id;
+                $topic->name =  $name;
+                $topic->save();
+
+                // Attach campuses to the session
+                // $chapter->subjects()->attach($validatedData['subject_id']);
+                $message = 'Topics created successfully.';
+                Session::flash('success', $message);
+            }
         }
-
-        // Create a new topic instance
-        $topic = new Topic();
-        $topic->classroom_id =  $request->class_id;
-        $topic->subject_id =  $request->subject_id;
-        $topic->chapter_id =  $request->chapter_id;
-        $topic->name = $name;
-        $topic->save();
-
-        // Attach chapters to the topic
-        // $topic->chapters()->attach($validatedData['chapter_id']);
     }
 
-    return redirect()->route('topic.index')->with('success', 'Topics created successfully.');
+    return redirect()->route('topic.index');
 }
 
 

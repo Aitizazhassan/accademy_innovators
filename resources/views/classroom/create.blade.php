@@ -32,7 +32,7 @@
                                         {{ $row->name }}
                                     </option>
                                 @empty
-                                    <option value="">No session found</option>
+                                    <option value="">No board found</option>
                                 @endforelse
                             </select>
 

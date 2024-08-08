@@ -19,21 +19,22 @@
             <form method="POST" action="{{ route('topic.store') }}">
                 @csrf
                 <div class="row push p-sm-2 p-lg-4">
-                    <!-- Class Name Selection -->
-                    <div class="col-xl-6 order-xl-0">
-                       <div class="mb-4">
-                           <label class="form-label" for="class_id">Class </label>
-                           <select name="class_id" id="class_id" class="form-control form-control-sm select2-single" required>
-                               <option value="">Select Class</option>
-                               @forelse ($classes as $row)
-                                   <option value="{{ $row->id }}" {{ old('class_id') == $row->id ? 'selected' : '' }}>{{ $row->name }}</option>
-                               @empty
-                                   <option value="">No class found</option>
-                               @endforelse
-                           </select>
-                           <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
-                       </div>
-                   </div>
+                    
+                     <!-- Class Name Selection -->
+                     <div class="col-xl-6 order-xl-0">
+                        <div class="mb-4">
+                            <label class="form-label" for="class_id">Class </label>
+                            <select name="class_id[]" id="class_id" class="form-control form-control-sm  select2-multiple" multiple="multiple" required>
+                                <option value="">Select Class</option>
+                                @forelse ($classes as $row)
+                                    <option value="{{ $row->id }}" {{ old('class_id') == $row->id ? 'selected' : '' }}>{{ $row->name }}</option>
+                                @empty
+                                    <option value="">No class found</option>
+                                @endforelse
+                            </select>
+                            <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
+                        </div>
+                    </div>
                    <div class="col-xl-6 order-xl-0">
                        <div class="mb-4">
                            <label class="form-label" for="profile-edit-name">Subject Name</label>
@@ -86,7 +87,7 @@
 <script>
     $(document).ready(function() {
         $('.js-example-basic-multiple').select2();
-        $('.select2-single').select2();
+        $('.select2-single, .select2-multiple').select2();
     });
     $(document).ready(function() {
         $('#chapter-select').select2();

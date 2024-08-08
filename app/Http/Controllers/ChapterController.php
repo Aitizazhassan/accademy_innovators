@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Session;
 class ChapterController extends Controller
 {
 
@@ -190,25 +190,28 @@ class ChapterController extends Controller
             'subject_id' => 'required',
             'name.*' => 'required|string',
         ]);
+        foreach ($validatedData['class_id'] as $classId) {
 
-        foreach ($validatedData['name'] as $name) {
-            $existingTopic = Chapter::where('name', $name)->first();
-            if ($existingTopic) {
-                return redirect()->back()->with('error', "A Chapter with the name '{$name}' already exists.");
+            foreach ($validatedData['name'] as $name) {
+                $existingTopic = Chapter::where('name', $name)->where('classroom_id', $classId)->where('subject_id', $request->subject_id)->first();
+                if ($existingTopic) {
+                    Session::flash('error', "A Chapter with the name '{$name}' against such class and subject already exists.");
+                } else {
+                    // Create a new topic instance
+                    $chapter = new Chapter();
+                    $chapter->classroom_id =  $classId;
+                    $chapter->subject_id =  $request->subject_id;
+                    $chapter->name =  $name;
+                    $chapter->save();
+                    // Attach campuses to the session
+                    // $chapter->subjects()->attach($validatedData['subject_id']);
+                    $message = 'Chapters created successfully.';
+                    Session::flash('success', $message);
+                }
             }
-
-            // Create a new topic instance
-            $chapter = new Chapter();
-            $chapter->classroom_id =  $request->class_id;
-            $chapter->subject_id =  $request->subject_id;
-            $chapter->name =  $name;
-            $chapter->save();
-
-            // Attach campuses to the session
-            // $chapter->subjects()->attach($validatedData['subject_id']);
         }
 
-        return redirect()->route('chapter.index')->with('success', 'Chapter created successfully.');
+        return redirect()->route('chapter.index');
     }
 
 

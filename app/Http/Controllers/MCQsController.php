@@ -170,8 +170,13 @@ class MCQsController extends Controller
     public function getSubjects($classroom_id)
     {
         // Retrieve the subjects associated with the given classroom_id
+        $classroom_id = explode(',', $classroom_id);
         $subjects = Subject::whereHas('classrooms', function ($query) use ($classroom_id) {
-            $query->where('classroom_id', $classroom_id);
+            if(is_array($classroom_id)){
+                $query->whereIn('classroom_id', $classroom_id);
+            } else {
+                $query->where('classroom_id', $classroom_id);
+            }
         })->get();
 
         return response()->json($subjects);

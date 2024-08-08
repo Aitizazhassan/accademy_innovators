@@ -23,7 +23,7 @@
                      <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="class_id">Class </label>
-                            <select name="class_id" id="class_id" class="form-control form-control-sm select2-single" required>
+                            <select name="class_id[]" id="class_id" class="form-control form-control-sm  select2-multiple" multiple="multiple" required>
                                 <option value="">Select Class</option>
                                 @forelse ($classes as $row)
                                     <option value="{{ $row->id }}" {{ old('class_id') == $row->id ? 'selected' : '' }}>{{ $row->name }}</option>
@@ -73,7 +73,7 @@
 <script>
     $(document).ready(function() {
         $('.js-example-basic-multiple').select2();
-        $('.select2-single').select2();
+        $('.select2-single, .select2-multiple').select2();
     });
 
     $(document).ready(function() {
