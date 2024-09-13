@@ -21,7 +21,7 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="country_id">Country Name</label>
-                            <select name="country_id" id="country_id" class="form-control form-control-sm select2-single">
+                            <select name="country_id[]" id="country_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Country</option>
                                 @forelse ($countries as $row)
                                     <option value="{{ $row->id }}" {{ old('country_id') == $row->id ? 'selected' : '' }}>
@@ -39,7 +39,7 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="board_id">Board Name</label>
-                            <select name="board_id" id="board_id" class="form-control form-control-sm select2-single">
+                            <select name="board_id[]" id="board_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Board</option>
                             </select>
                             <x-input-error :messages="$errors->get('board_id')" class="mt-2" />
@@ -50,7 +50,7 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="class_id">Class Name</label>
-                            <select name="class_id" id="class_id" class="form-control form-control-sm select2-single">
+                            <select name="class_id[]" id="class_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Class</option>
                             </select>
                             <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
@@ -61,7 +61,7 @@
                     <div class="col-xl-4 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="subject_id">Subject Name</label>
-                            <select name="subject_id" id="subject_id" class="form-control form-control-sm select2-single">
+                            <select name="subject_id[]" id="subject_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Subject</option>
                             </select>
                             <x-input-error :messages="$errors->get('subject_id')" class="mt-2" />
@@ -72,7 +72,7 @@
                     <div class="col-xl-4 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="chapter_id">Chapter Name</label>
-                            <select name="chapter_id" id="chapter_id" class="form-control form-control-sm select2-single">
+                            <select name="chapter_id[]" id="chapter_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Chapter</option>
                             </select>
                             <x-input-error :messages="$errors->get('chapter_id')" class="mt-2" />
@@ -83,7 +83,7 @@
                     <div class="col-xl-4 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="topic_id">Topic Name</label>
-                            <select name="topic_id" id="topic_id" class="form-control form-control-sm select2-single">
+                            <select name="topic_id[]" id="topic_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Topic</option>
                             </select>
                             <x-input-error :messages="$errors->get('topic_id')" class="mt-2" />
@@ -260,7 +260,7 @@
 
         $('#country_id').change(function() {
             var countryId = $(this).val();
-            if (countryId) {
+            if (countryId.length > 0) {
                 $.ajax({
                     url: getBoardUrl.replace(':country_id', countryId),
                     type: 'GET',
@@ -292,7 +292,7 @@
 
         $('#board_id').change(function() {
             var boardId = $(this).val();
-            if (boardId) {
+            if (boardId.length > 0) {
                 $.ajax({
                     url: getClassUrl.replace(':board_id', boardId),
                     type: 'GET',
@@ -321,7 +321,7 @@
 
         $('#class_id').change(function() {
             var classId = $(this).val();
-            if (classId) {
+            if (classId.length > 0) {
                 $.ajax({
                     url: getSubjectsUrl.replace(':class_id', classId),
                     type: 'GET',
@@ -347,7 +347,7 @@
 
         $('#subject_id').change(function() {
             var subjectId = $(this).val();
-            if (subjectId) {
+            if (subjectId.length > 0) {
                 $.ajax({
                     url: getChaptersUrl.replace(':subject_id', subjectId),
                     type: 'GET',
@@ -370,7 +370,7 @@
 
         $('#chapter_id').change(function() {
             var chapterId = $(this).val();
-            if (chapterId) {
+            if (chapterId.length > 0) {
                 $.ajax({
                     url: getTopicsUrl.replace(':chapter_id', chapterId),
                     type: 'GET',

@@ -45,40 +45,43 @@
     <h1>Grand Test MCQs</h1>
     @for($i = 0; $i < $numGrandTests; $i++)
         <h2>Grand Test {{ $i + 1 }}</h2>
-        @foreach($mcqs as $subject => $chapters)
-            <h3>Subject: {{ $subject }}</h3>
-            @foreach($chapters as $chapter => $questions)
-                <h4>Chapter: {{ $chapter }}</h4>
-                @foreach($questions as $mcq)
-                <table>
-                    <tr>
-                        <td>
-                            <div class="content">
-                                <p><strong>{{ $loop->iteration }})</strong> {!! strip_tags($mcq->statement) !!}</p>
-                                <p><strong>A)</strong> {!! strip_tags($mcq->optionA) !!}</p>
-                                <p><strong>B)</strong> {!! strip_tags($mcq->optionB) !!}</p>
-                                <p><strong>C)</strong> {!! strip_tags($mcq->optionC) !!}</p>
-                                <p><strong>D)</strong> {!! strip_tags($mcq->optionD) !!}</p>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="qr-codes">
-                                @if ($mcq->qr_code_english)
-                                    <div class="english-solution">
-                                        <p>English</p>{!! $mcq->qr_code_english !!}
-                                    </div>
-                                @endif
-                                @if ($mcq->qr_code_urdu)
-                                <div class="urdu-solution">
-                                    <p>Urdu</p>{!! $mcq->qr_code_urdu !!}
+        @foreach($mcqs[$i] as $subject => $questions)
+            {{-- @if($questions->count() > 0) --}}
+                <h3>Subject: {{ $subject }}</h3>
+                {{-- @foreach($chapters as $chapter => $questions)
+                    <h4>Chapter: {{ $chapter }}</h4> --}}
+                    @foreach($questions as $mcq)
+                    <table>
+                        <tr>
+                            <td>
+                                <div class="content">
+                                    <p><strong>{{ $loop->iteration }})</strong> {!! strip_tags($mcq->statement) !!}</p>
+                                    <p><strong>A)</strong> {!! strip_tags($mcq->optionA) !!}</p>
+                                    <p><strong>B)</strong> {!! strip_tags($mcq->optionB) !!}</p>
+                                    <p><strong>C)</strong> {!! strip_tags($mcq->optionC) !!}</p>
+                                    <p><strong>D)</strong> {!! strip_tags($mcq->optionD) !!}</p>
                                 </div>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-                @endforeach
-            @endforeach
+                            </td>
+                            <td>
+                                <div class="qr-codes">
+                                    @if ($mcq->qr_code_english)
+                                        <div class="english-solution">
+                                            <p>English</p>{!! $mcq->qr_code_english !!}
+                                        </div>
+                                    @endif
+                                    @if ($mcq->qr_code_urdu)
+                                    <div class="urdu-solution">
+                                        <p>Urdu</p>{!! $mcq->qr_code_urdu !!}
+                                    </div>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    @endforeach
+                {{-- @endforeach --}}
+
+            {{-- @endif --}}
         @endforeach
     @endfor
 </body>

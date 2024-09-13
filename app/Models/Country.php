@@ -20,6 +20,11 @@ class Country extends Model
         return $this->belongsToMany(Board::class);
     }
 
+    public function mcqs()
+    {
+        return $this->belongsToMany(MCQs::class);
+    }
+
     
 
 }

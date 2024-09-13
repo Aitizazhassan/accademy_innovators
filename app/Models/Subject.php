@@ -63,7 +63,13 @@ class Subject extends Model
 
     public function mcqs()
     {
-        return $this->hasManyThrough(Mcqs::class, Chapter::class);
+        // return $this->hasManyThrough(Mcqs::class, Chapter::class);
+        return $this->hasMany(MCQs::class);
+    }
+
+    public function mcqss()
+    {
+        return $this->belongsToMany(MCQs::class);
     }
 
 }

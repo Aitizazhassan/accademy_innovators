@@ -59,8 +59,13 @@ class Chapter extends Model
 //     return $this->belongsToMany(Topic::class, 'topic_chapter', 'chapter_id', 'topic_id');
 // }
 
+    // public function mcqs()
+    // {
+    //     return $this->hasMany(Mcqs::class);
+    // }
+
     public function mcqs()
     {
-        return $this->hasMany(Mcqs::class);
+        return $this->belongsToMany(MCQs::class);
     }
 }

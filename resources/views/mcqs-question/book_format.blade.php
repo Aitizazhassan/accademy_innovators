@@ -104,21 +104,21 @@
                             <div class="row push">
                                 <div class="col-xl-6 order-xl-0">
                                     <label class="form-label">Select Specific Chapters (Multiple):</label>
-                                    <select name="grandTestChapters[]" id="grandTestChapters" multiple class="form-control form-control-sm select2-single"></select>
+                                    <select name="chapter_id[]" id="grandTestChapters" multiple class="form-control form-control-sm select2-single"></select>
                                 </div>
-                                <div class="col-xl-6 order-xl-0">
+                                {{-- <div class="col-xl-6 order-xl-0">
                                     <label class="form-label">Random Selection of Topics:</label>
                                     <input type="text" name="grandTestTopics" id="grandTestTopics" class="form-control form-control-sm">
-                                </div>
-                                <div class="col-xl-6 order-xl-0">
+                                </div> --}}
+                                <div class="col-xl-6 order-xl-0 mb-4">
                                     <label class="form-label">Number of Grand Tests per Book:</label>
                                     <input type="number" name="numGrandTests" id="numGrandTests" class="form-control form-control-sm">
                                 </div>
-                                <div class="col-xl-6 order-xl-0">
+                                <div class="col-xl-6 order-xl-0 mb-4">
                                     <label class="form-label">Number of Questions per Grand Test:</label>
                                     <input type="number" name="questionsPerGrandTest" id="questionsPerGrandTest" class="form-control form-control-sm">
                                 </div>
-                                <div class="col-xl-6 order-xl-0">
+                                <div class="col-xl-6 order-xl-0 mb-4">
                                     <label class="form-label">Number of Questions per Subject:</label>
                                     <input type="number" name="questionsPerSubjectGrandTest" id="questionsPerSubjectGrandTest" class="form-control form-control-sm">
                                 </div>
@@ -130,45 +130,21 @@
                     <div id="mockTestFields" class="col-xl-12 patternFields" style="display: none;">
                         <div class="mb-4">
                             <div class="row push">
-                                <div class="col-xl-6 order-xl-0">
+                                <div class="col-xl-6 order-xl-0 mb-4">
                                     <label class="form-label">Number of Mock Tests per Book:</label>
                                     <input type="number" name="numMockTests" id="numMockTests" class="form-control form-control-sm">
                                 </div>
-                                <div class="col-xl-6 order-xl-0">
+                                <div class="col-xl-6 order-xl-0 mb-4">
                                     <label class="form-label">Number of Questions per Mock Test:</label>
                                     <input type="number" name="questionsPerMockTest" id="questionsPerMockTest" class="form-control form-control-sm">
                                 </div>
-                                <div class="col-xl-6 order-xl-0">
+                                <div class="col-xl-6 order-xl-0 mb-4">
                                     <label class="form-label">Number of Questions per Subject:</label>
                                     <input type="number" name="questionsPerSubjectMockTest" id="questionsPerSubjectMockTest" class="form-control form-control-sm">
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
-
-                    <!-- Chapter Name Selection -->
-                    {{-- <div class="col-xl-4 order-xl-0">
-                        <div class="mb-4">
-                            <label class="form-label" for="chapter_id">Chapter Name</label>
-                            <select name="chapter_id" id="chapter_id" class="form-control form-control-sm select2-single">
-                                <option value="">Select Chapter</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('chapter_id')" class="mt-2" />
-                        </div>
-                    </div> --}}
-
-                    <!-- Topic Name Selection -->
-                    {{-- <div class="col-xl-4 order-xl-0">
-                        <div class="mb-4">
-                            <label class="form-label" for="topic_id">Topic Name</label>
-                            <select name="topic_id" id="topic_id" class="form-control form-control-sm select2-single">
-                                <option value="">Select Topic</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('topic_id')" class="mt-2" />
-                        </div>
-                    </div> --}}
 
                     <!-- Submit Button -->
                     <div class="mb-4">
@@ -286,7 +262,7 @@
             }
         });
 
-        $('#subject_id').change(function() {
+         $('#subject_id').change(function() {
             var subjectId = $(this).val();
             var selectedPathern = $('#select_pathern').val();
             if (subjectId) {
@@ -324,25 +300,55 @@
             }
         });
 
-        // $('#chapter_id').change(function() {
-        //     var chapterId = $(this).val();
-        //     if (chapterId) {
+        // $('#subject_id').change(function() {
+        //     var subjectId = $(this).val();
+        //     var selectedPathern = $('#select_pathern').val();
+            
+        //     // Remove any existing input field for number of MCQs for previous subject
+        //     $('#mcq_number_field').remove();
+
+        //     if (subjectId) {
         //         $.ajax({
-        //             url: getTopicsUrl.replace(':chapter_id', chapterId),
+        //             url: getChaptersUrl.replace(':subject_id', subjectId),
         //             type: 'GET',
         //             success: function(data) {
-        //                 $('#topic_id').empty().append(
-        //                     '<option value="">Select Topic</option>');
-        //                 $.each(data, function(key, value) {
-        //                     $('#topic_id').append('<option value="' + value.id +
-        //                         '">' + value.name + '</option>');
-        //                 });
+        //                 if (selectedPathern == 'chapter_wise') {
+        //                     $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+        //                     $.each(data, function(key, value) {
+        //                         $('#chapter_id').append('<option value="' + value.id + '">' + value.name + '</option>');
+        //                     });
+        //                 } else if (selectedPathern == 'grand_test') {
+        //                     $('#grandTestChapters').empty().append('<option value="">Select Chapter</option>');
+        //                     $.each(data, function(key, value) {
+        //                         $('#grandTestChapters').append('<option value="' + value.id + '">' + value.name + '</option>');
+        //                     });
+        //                 } else if (selectedPathern == 'mock_test') {
+        //                     // Implement the logic for mock test if required
+        //                 }
+
+        //                 // Append a new field for the number of MCQs for the selected subject
+        //                 var mcqFieldHtml = `
+        //                     <div class="form-group mt-4" id="mcq_number_field">
+        //                         <label for="mcq_number">Number of MCQs for Subject</label>
+        //                         <input type="number" class="form-control" id="mcq_number" name="mcq_number[${subjectId}]"
+        //                             placeholder="Enter number of MCQs" min="1">
+        //                     </div>`;
+        //                 $(mcqFieldHtml).insertAfter('#subject_id');
+                        
+        //                 // Re-initialize select2
+        //                 $('.select2-single').select2();
+        //             },
+        //             error: function(error) {
+        //                 $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+        //                 $('#grandTestChapters').empty().append('<option value="">Select Chapter</option>');
         //             }
         //         });
         //     } else {
-        //         $('#topic_id').empty().append('<option value="">Select Topic</option>');
+        //         $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+        //         $('#grandTestChapters').empty().append('<option value="">Select Chapter</option>');
         //     }
         // });
+
 
         $('#select_pathern').change(function(e) {
             e.preventDefault();
@@ -359,6 +365,7 @@
                 switch (selectedPathern) {
                     case 'chapter_wise':
                         subjectSelect.attr('multiple', false);
+                        subjectSelect.attr('name', 'subject_id');
                         $('#chapterWiseFields').show();
                         break;
                     case 'grand_test':
@@ -378,6 +385,9 @@
                 subjects.forEach(function(subject) {
                     subjectSelect.append('<option value="' + subject.id + '">' + subject.name + '</option>');
                 });  
+                
+                $('#grandTestChapters').empty().append('<option value="">Select Chapter</option>');
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
                 $('.subjectSelectField').show(); 
                 $('.select2-single').select2();
             });
@@ -399,7 +409,7 @@
                     {
                         window.open(response.pdf_url, '_blank');
                     } else {
-                        showNotification('danger', 'No mcqs record found against your selected search criteria');
+                        showNotification('warning', response.message);
                     }
                 },
                 error: function(response) {
@@ -464,10 +474,6 @@
                     showNotification('danger', "Estimate Name cannot be empty.");
                     return false; 
                 }
-                // if (fieldName === 'drawing_date' && fieldValue.length === 0) {
-                //     showNotification('danger', "Please select the drawing date for estimate.");
-                //     return false; 
-                // }
             }
 
             return true;

@@ -42,40 +42,43 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Mock Test MCQs</h1>
-    </div>
-    @foreach($subjects as $subject)
-        <h2>{{ $subject }}</h2>
-        @foreach($mcqs[$subject] as $mcq)
-            <table>
-                <tr>
-                    <td>
-                        <div class="content">
-                            <p><strong>{{ $loop->iteration }}:</strong> {!! strip_tags($mcq->statement) !!}</p>
-                            <p><strong>A:</strong> {!! strip_tags($mcq->optionA) !!}</p>
-                            <p><strong>B:</strong> {!! strip_tags($mcq->optionB) !!}</p>
-                            <p><strong>C:</strong> {!! strip_tags($mcq->optionC) !!}</p>
-                            <p><strong>D:</strong> {!! strip_tags($mcq->optionD) !!}</p>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="qr-codes">
-                            @if ($mcq->qr_code_english)
-                                <div class="english-solution">
-                                    <p>English</p>{!! $mcq->qr_code_english !!}
-                                </div>
-                            @endif
-                            @if ($mcq->qr_code_urdu)
-                            <div class="urdu-solution">
-                                <p>Urdu</p>{!! $mcq->qr_code_urdu !!}
+    <h1>Mock Test MCQs</h1>
+    @for($i = 0; $i < $numMockTests; $i++)
+        <h2>Mock Test {{ $i + 1 }}</h2>
+        @isset($mcqs[$i])
+        @foreach($mcqs[$i] as $subject => $questions)
+            <h3>Subject: {{ $subject }}</h3>
+            @foreach($questions as $mcq)
+                <table>
+                    <tr>
+                        <td>
+                            <div class="content">
+                                <p><strong>{{ $loop->iteration }})</strong> {!! strip_tags($mcq->statement) !!}</p>
+                                <p><strong>A)</strong> {!! strip_tags($mcq->optionA) !!}</p>
+                                <p><strong>B)</strong> {!! strip_tags($mcq->optionB) !!}</p>
+                                <p><strong>C)</strong> {!! strip_tags($mcq->optionC) !!}</p>
+                                <p><strong>D)</strong> {!! strip_tags($mcq->optionD) !!}</p>
                             </div>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-            </table>
+                        </td>
+                        <td>
+                            <div class="qr-codes">
+                                @if ($mcq->qr_code_english)
+                                    <div class="english-solution">
+                                        <p>English</p>{!! $mcq->qr_code_english !!}
+                                    </div>
+                                @endif
+                                @if ($mcq->qr_code_urdu)
+                                    <div class="urdu-solution">
+                                        <p>Urdu</p>{!! $mcq->qr_code_urdu !!}
+                                    </div>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            @endforeach
         @endforeach
-    @endforeach
+        @endif
+    @endfor
 </body>
 </html>

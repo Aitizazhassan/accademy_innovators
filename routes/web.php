@@ -114,6 +114,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/mcqs-bookformat', [MCQsController::class, 'viewBookFormatPDF']);
 
         Route::post('/get/book-format-pdf', [MCQsController::class, 'getBookFormatPdf'])->name('mcqs.get.bookFormatPDF');
+        Route::post('/get/test-format-pdf', [MCQsController::class, 'getTestFormatPdf'])->name('mcqs.get.testFormatPDF');
+
 
     });
 });
