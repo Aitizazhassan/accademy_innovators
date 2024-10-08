@@ -22,15 +22,13 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group mb-4">
                             <label for="class">Select Class</label>
-                            <select name="class_id" id="class_id" class="form-control form-contol-sm select2-single" required>
+                            <select name="class_id[]" id="class_id" class="form-control form-contol-sm select2-multiple" multiple required>
                             <option disabled value="">Select Class</option>
-                                @forelse ($classes as $row)
-                                    <option value="{{ $row->id }}" {{ old('class_id', $topic->classroom->id == $row->id) ? 'selected' : '' }}>
-                                        {{ $row->name }}
+                                @foreach($classes as $class)
+                                    <option value="{{ $class->id }}" {{ in_array($class->id, $topic->classes->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                        {{ $class->name }}
                                     </option>
-                                @empty
-                                    <option value="">No Class found</option>
-                                @endforelse
+                                @endforeach
                             </select>
                             <x-input-error-field :messages="$errors->get('class_id')" class="mt-2" />
                         </div>
@@ -38,15 +36,13 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group mb-4">
                             <label for="Subject">Select Subject</label>
-                            <select name="subject_id" id="subject_id" class="form-control form-contol-sm select2-single" required>
+                            <select name="subject_id[]" id="subject_id" class="form-control form-contol-sm select2-multiple" multiple required>
                             <option disabled value="">Select Subject</option>
-                                @forelse ($subjects as $row)
-                                    <option value="{{ $row->id }}" {{ old('subject_id', $topic->subject->id == $row->id) ? 'selected' : '' }}>
-                                        {{ $row->name }}
+                                @foreach($subjects as $subject)
+                                    <option value="{{ $subject->id }}" {{ in_array($subject->id, $topic->subjects->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                        {{ $subject->name }}
                                     </option>
-                                @empty
-                                    <option value="">No subjects found</option>
-                                @endforelse
+                                @endforeach
                             </select>
                             <x-input-error-field :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
@@ -54,13 +50,13 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group">
                             <label for="chapters">Select Chapter</label>
-                            <select name="chapter_id" id="chapter_id" class="form-control form-contol-sm select2-single" required>
+                            <select name="chapter_id[]" id="chapter_id" class="form-control form-contol-sm select2-multiple" multiple required>
                                 <option disabled value="">Select Chapter</option>
-                                @foreach ($chapters as $chapter)
-                                    <option value="{{ $chapter->id }}" {{ old('subject_id', $topic->chapter->id == $chapter->id) ? 'selected' : '' }}>
-                                        {{ $chapter->name }}
-                                    </option>
-                                @endforeach
+                                    @foreach($chapters as $chapter)
+                                        <option value="{{ $chapter->id }}" {{ in_array($chapter->id, $topic->chapters->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                            {{ $chapter->name }}
+                                        </option>
+                                    @endforeach
                             </select>
                             <x-input-error-field :messages="$errors->get('chapter_id')" class="mt-2" />
                         </div>
@@ -91,61 +87,67 @@
 </x-app-layout>
 <script>
    $(document).ready(function() {
-        $('.js-example-basic-multiple').select2();
-        $('.select2-single').select2();
+
+        $('.select2-multiple').select2();
         var getSubjectsUrl = "{{ route('getSubjects', ':class_id') }}";
         var getChaptersUrl = "{{ route('getChapters', ':subject_id') }}";
 
         $('#class_id').change(function() {
-            var classId = $(this).val();
-            if (classId) {
+            var classIds = $(this).val();
+            if (classIds && classIds.length > 0) {
                 $.ajax({
-                    url: getSubjectsUrl.replace(':class_id', classId),
+                    url: getSubjectsUrl.replace(':class_id', classIds.join(',')),
                     type: 'GET',
                     success: function(data) {
-                        $('#subject_id').empty().append(
-                            '<option value="">Select Subject</option>');
+                        // Get existing selected subjects
+                        var selectedSubjects = $('#subject_id').val() || [];
+
+                        // Clear the subject dropdown
+                        $('#subject_id').empty().append('<option value="">Select Subject</option>');
+
+                        // Append new subjects to the dropdown and maintain valid selections
                         $.each(data, function(key, value) {
-                            $('#subject_id').append('<option value="' + value.id +
-                                '">' + value.name + '</option>');
+                            $('#subject_id').append('<option value="' + value.id + '">' + value.name + '</option>');
                         });
-                        $('#chapter_id').empty().append(
-                            '<option value="">Select Chapter</option>');
-                        $('.select2-single').select2();
+
+                        // Keep only valid selected subjects
+                        $('#subject_id').val(selectedSubjects.filter(id => data.some(subject => subject.id == id)));
+                        $('.select2-multiple').select2(); // Re-initialize select2
                     }
                 });
             } else {
+                // If no class is selected, clear subjects
                 $('#subject_id').empty().append('<option value="">Select Subject</option>');
-                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                $('#chapter_id').empty().append('<option value="">Select Chapter</option>'); // Clear chapters
             }
         });
-        
+
         $('#subject_id').change(function() {
-            var subjectId = $(this).val();
-            if (subjectId) {
+            var subjectIds = $(this).val();
+            if (subjectIds && subjectIds.length > 0) {
                 $.ajax({
-                    url: getChaptersUrl.replace(':subject_id', subjectId),
+                    url: getChaptersUrl.replace(':subject_id', subjectIds.join(',')),
                     type: 'GET',
                     success: function(data) {
-                        
-                        $('#chapter_id').empty().append(
-                            '<option value="">Select Chapter</option>');
-                        $.each(data, function(key, value) {
-                            $('#chapter_id').append('<option value="' + value.id +
-                                '">' + value.name + '</option>');
-                        });
-                        // $('#topic_id').empty().append(
-                        //     '<option value="">Select Chapter</option>');
-                        $('.select2-single').select2();
-                    },
-                    error: function(error){
+                        // Get existing selected chapters
+                        var selectedChapters = $('#chapter_id').val() || [];
+
+                        // Clear the chapter dropdown
                         $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
-                        // $('#topic_id').empty().append('<option value="">Select Topic</option>');
+
+                        // Append new chapters to the dropdown and maintain valid selections
+                        $.each(data, function(key, value) {
+                            $('#chapter_id').append('<option value="' + value.id + '">' + value.name + '</option>');
+                        });
+
+                        // Keep only valid selected chapters
+                        $('#chapter_id').val(selectedChapters.filter(id => data.some(chapter => chapter.id == id)));
+                        $('.select2-multiple').select2(); // Re-initialize select2
                     }
                 });
             } else {
+                // If no subject is selected, clear chapters
                 $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
-                // $('#topic_id').empty().append('<option value="">Select Topic</option>');
             }
         });
     });

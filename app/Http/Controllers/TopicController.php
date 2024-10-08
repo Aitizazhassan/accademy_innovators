@@ -27,85 +27,80 @@ class TopicController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $currentUserId = Auth::id();
-            //$classroom = Classroom::select(['id', 'name', 'created_at']);
-            $topics = Topic::with('chapter', 'subject', 'classroom', 'classroom.boards', 'classroom.boards.countries')->orderBy('id', 'desc');
+            $topics = Topic::with('chapters', 'subjects', 'classes', 'classes.boards', 'classes.boards.countries')
+                ->orderBy('id', 'desc');
+        
             return Datatables::of($topics)
                 ->addIndexColumn()
                 ->addColumn('dateAdded', function ($row) {
-                    $dateAdded = \Carbon\Carbon::parse($row->created_at);
-                    return '<span class="">' . date("d-m-Y", strtotime($dateAdded)) . '</span>';
-                    // '<br><span class="text-muted">' . date("g:i A", strtotime($dateAdded)) . '</span>';
+                    return '<span class="">' . $row->created_at->format('d-m-Y') . '</span>';
                 })
                 ->addColumn('topic_countries', function ($row) {
                     $countries = '';
-                    $addedCountries = []; 
-                    if ($row->classroom) {
-                            if ($row->classroom->boards) {
-                                foreach ($row->classroom->boards as $board) {
-                                    if ($board->countries) {
-                                        foreach ($board->countries as $country) {
-                                            if (!in_array($country->name, $addedCountries)) {
-                                                $countries .= '<span class="badge bg-primary">' . $country->name . '</span>&nbsp;';
-                                                $addedCountries[] = $country->name;
-                                            }
-                                        }
-                                    }
+                    $addedCountries = [];
+        
+                    foreach ($row->classes as $class) {
+                        foreach ($class->boards as $board) {
+                            foreach ($board->countries as $country) {
+                                if (!in_array($country->name, $addedCountries)) {
+                                    $countries .= '<span class="badge bg-primary">' . $country->name . '</span>&nbsp;';
+                                    $addedCountries[] = $country->name;
                                 }
                             }
+                        }
                     }
                     return $countries;
                 })
                 ->addColumn('topic_boards', function ($row) {
                     $boards = '';
                     $addedBoards = [];
-                    if ($row->classroom) {
-                            if ($row->classroom->boards) {
-                                foreach ($row->classroom->boards as $board) {
-                                    if (!in_array($board->name, $addedBoards)) {
-                                        $boards .= '<span class="badge bg-primary">' . $board->name . '</span>&nbsp;';
-                                        $addedBoards[] = $board->name;
-                                    }
-                                }
+        
+                    foreach ($row->classes as $class) {
+                        foreach ($class->boards as $board) {
+                            if (!in_array($board->name, $addedBoards)) {
+                                $boards .= '<span class="badge bg-primary">' . $board->name . '</span>&nbsp;';
+                                $addedBoards[] = $board->name;
                             }
+                        }
                     }
                     return $boards;
                 })
-                ->addColumn('topic_classroom', function ($row) {
-                    $classroom = '';
-                    if ($row->classroom) {
-                        $classroom = $row->classroom->name;
+                ->addColumn('topic_classes', function ($row) {
+                    $classes = '';
+                    foreach ($row->classes as $class) {
+                        $classes .= '<span class="badge bg-info">' . $class->name . '</span>&nbsp;';
                     }
-                    return $classroom;
+                    return $classes;
                 })
-                ->addColumn('topic_subject', function ($row) {
-                    $subject = '';
-                    if ($row->subject) {
-                            $subject = $row->subject->name;
+                ->addColumn('topic_subjects', function ($row) {
+                    $subjects = '';
+                    foreach ($row->subjects as $subject) {
+                        $subjects .= '<span class="badge bg-warning">' . $subject->name . '</span>&nbsp;';
                     }
-                    return $subject;
+                    return $subjects;
                 })
-                ->addColumn('topic_chapter', function ($row) {
-                    $chapter = '';
-                    if ($row->chapter) {
-                            $chapter = $row->chapter->name;
+                ->addColumn('topic_chapters', function ($row) {
+                    $chapters = '';
+                    foreach ($row->chapters as $chapter) {
+                        $chapters .= '<span class="badge bg-secondary">' . $chapter->name . '</span>&nbsp;';
                     }
-                    return $chapter;
+                    return $chapters;
                 })
                 ->addColumn('actions', function ($row) {
                     $settingsButton = '<a href="' . route('topic.edit', $row->id) . '" class="btn btn-sm btn-alt-secondary" data-bs-toggle="tooltip" title="Edit">
-                                       <i class="fa fa-pencil-alt"></i>
-                                   </a>';
-                    $deleteButton = '<a href="#" class="btn btn-sm btn-alt-secondary delete-user" data-bs-toggle="tooltip" data-id="' . $row->id . '" title="Delete">
-                                            <i class="fa fa-times"></i>
-                                        </a>';
-                    $settingsButton = Gate::check('user.edit') ? $settingsButton : '';
-                    $deleteButton = Gate::check('user.delete') ? $deleteButton : '';
+                                          <i class="fa fa-pencil-alt"></i>
+                                      </a>';
+        
+                    $deleteButton = '<a href="#" class="btn btn-sm btn-alt-secondary delete-topic" data-bs-toggle="tooltip" data-id="' . $row->id . '" title="Delete">
+                                      <i class="fa fa-times"></i>
+                                    </a>';
+        
                     return '<div class="btn-group">' . $settingsButton . $deleteButton . '</div>';
                 })
-                ->rawColumns(['dateAdded', 'status', 'topic_countries', 'topic_boards', 'topic_classroom', 'topic_subject', 'topic_chapter', 'actions'])
+                ->rawColumns(['dateAdded', 'topic_countries', 'topic_boards', 'topic_classes', 'topic_subjects', 'topic_chapters', 'actions'])
                 ->make(true);
         }
+        
         $pageHead = 'Topic';
         $pageTitle = 'Topic';
         $activeMenu = 'Topic';
@@ -154,99 +149,76 @@ class TopicController extends Controller
 
     // }
     public function store(TopicRequest $request)
-{
-    $validatedData = $request->validate([
-        'class_id' => 'required',
-        'subject_id' => 'required',
-        'chapter_id' => 'required',
-        'name.*' => 'required|string',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'class_id' => 'required|array',
+            'subject_id' => 'required|array',
+            'chapter_id' => 'required|array',
+            'name.*' => 'required|string|max:255',
+        ]);
 
-    // foreach ($validatedData['name'] as $name) {
-    //     // Check if a topic with the same name already exists
-    //     $existingTopic = Topic::where('name', $name)->first();
-    //     if ($existingTopic) {
-    //         // If a topic with the same name already exists, return with error message
-    //         return redirect()->back()->with('error', "A Topic with the name '{$name}' already exists.");
-    //     }
-
-    //     // Create a new topic instance
-    //     $topic = new Topic();
-    //     $topic->classroom_id =  $request->class_id;
-    //     $topic->subject_id =  $request->subject_id;
-    //     $topic->chapter_id =  $request->chapter_id;
-    //     $topic->name = $name;
-    //     $topic->save();
-
-    //     // Attach chapters to the topic
-    //     // $topic->chapters()->attach($validatedData['chapter_id']);
-    // }
-
-    foreach ($validatedData['class_id'] as $classId) {
-
+        // Loop through each topic name
         foreach ($validatedData['name'] as $name) {
-            $existingTopic = Topic::where('name', $name)->where('classroom_id', $classId)->where('subject_id', $request->subject_id)->where('chapter_id', $request->chapter_id)->first();
+            // Check if the topic exists
+            $existingTopic = Topic::where('name', $name)->first();
+
             if ($existingTopic) {
-                Session::flash('error', "A Topic with the name '{$name}' against such class and subject already exists.");
+                // If topic exists, sync the class, subject, and chapter relationships
+                $existingTopic->classes()->syncWithoutDetaching($validatedData['class_id']);
+                $existingTopic->subjects()->syncWithoutDetaching($validatedData['subject_id']);
+                $existingTopic->chapters()->syncWithoutDetaching($validatedData['chapter_id']);
             } else {
+                // Create a new topic
+                $topic = Topic::create(['name' => $name]);
 
-                // Create a new topic instance
-                $topic = new Topic();
-                $topic->classroom_id =  $classId;
-                $topic->subject_id =  $request->subject_id;
-                $topic->chapter_id =  $request->chapter_id;
-                $topic->name =  $name;
-                $topic->save();
-
-                // Attach campuses to the session
-                // $chapter->subjects()->attach($validatedData['subject_id']);
-                $message = 'Topics created successfully.';
-                Session::flash('success', $message);
+                // Attach the classes, subjects, and chapters to the new topic
+                $topic->classes()->attach($validatedData['class_id']);
+                $topic->subjects()->attach($validatedData['subject_id']);
+                $topic->chapters()->attach($validatedData['chapter_id']);
             }
         }
-    }
 
-    return redirect()->route('topic.index');
-}
+        return redirect()->route('topic.index')->with('success', 'Topics created successfully or Existing topic linked to the selected classes, subjects and chapters!');
+    }
 
 
 
     public function edit(Topic $topic)
-{
-    $topic = Topic::with('classroom', 'classroom.subjects', 'subject', 'subject.chapters')->find($topic->id);
-    $pageHead = 'Edit Topic';
-    $pageTitle = 'Edit Topic';
-    $activeMenu = 'Topic';
-    // Fetch all chapters to populate the dropdown
-    $classes = Classroom::get();
-    $subjects = $topic->classroom->subjects;
-    $chapters = $topic->subject->chapters;
+    {
+        $topic = Topic::with('classes', 'subjects', 'chapters', 'classroom.boards', 'classroom.boards.countries')->find($topic->id);
+        $pageHead = 'Edit Topic';
+        $pageTitle = 'Edit Topic';
+        $activeMenu = 'Topic';
+        
+        // Fetch all classes and subjects
+        $classes = Classroom::with('subjects')->get();
+        $subjects = Subject::all(); // Assuming you want all subjects, adjust as needed
+        $chapters = Chapter::all(); // Assuming you want all chapters, adjust as needed
+    
+        return view('topics.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'topic', 'classes', 'subjects', 'chapters'));
+    }
 
-    return view('topics.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'topic', 'classes', 'subjects', 'chapters'));
-}
-
-    public function update(TopicRequest $request, Topic $topic)
+    public function update(Request $request, Topic $topic)
     {
 
         $validatedData = $request->validate([
-            'class_id' => 'required',
-            'subject_id' => 'required',
-            'chapter_id' => 'required',
-            'name.*' => 'required|string',
+            'class_id' => 'required|array',
+            'subject_id' => 'required|array',
+            'chapter_id' => 'required|array',
+            'name' => 'required|string|max:255',
         ]);
-         // Validate the incoming request data
-         $validatedData = $request->validated();
 
-         // Update session name
-         $topic->name = $validatedData['name'];
-         $topic->classroom_id =  $request->class_id;
-         $topic->subject_id =  $request->subject_id;
-         $topic->chapter_id =  $request->chapter_id;
-         $topic->save();
+         // Update the topic name
+        $topic->name = $request->name;
+        $topic->save();
 
-         // Sync campuses for the session
-        //  $topic->chapters()->sync($validatedData['chapter_id']);
+        // Update the topic with the selected classes, subjects, and chapters
+        // Sync relationships with the selected IDs
+        $topic->classes()->sync($request->class_id);
+        $topic->subjects()->sync($request->subject_id);
+        $topic->chapters()->sync($request->chapter_id);
 
+        // Redirect back with a success message
         return redirect()->route('topic.index')->with('success', 'Topic updated successfully.');
 
     }

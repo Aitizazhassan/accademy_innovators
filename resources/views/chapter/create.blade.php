@@ -24,7 +24,7 @@
                         <div class="mb-4">
                             <label class="form-label" for="class_id">Class </label>
                             <select name="class_id[]" id="class_id" class="form-control form-control-sm  select2-multiple" multiple="multiple" required>
-                                <option value="">Select Class</option>
+                                <option value="">Select Classes</option>
                                 @forelse ($classes as $row)
                                     <option value="{{ $row->id }}" {{ old('class_id') == $row->id ? 'selected' : '' }}>{{ $row->name }}</option>
                                 @empty
@@ -37,8 +37,8 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
                             <label class="form-label" for="profile-edit-name">Subject Name</label>
-                           <select name="subject_id" id="subject_id" class="form-control form-contol-sm select2-single" required>
-                                <option disabled value="">Select Subject</option>
+                           <select name="subject_id[]" id="subject_id" class="form-control form-contol-sm select2-multiple"  multiple="multiple" required>
+                                <option disabled value="">Select Subjects</option>
                                 {{-- @forelse ($subjects as $row)
                                     <option value="{{ $row->id }}" {{ old('subject_id') == $row->id?'selected':'' }}>{{ $row->name }}</option>
                                 @empty
@@ -99,21 +99,21 @@
         });
 
         $('#class_id').change(function() {
-            var classId = $(this).val();
-            if (classId) {
+            var classIds = $(this).val();
+            if (classIds && classIds.length > 0) {
                 $.ajax({
-                    url: getSubjectsUrl.replace(':class_id', classId),
+                    url: getSubjectsUrl.replace(':class_id', classIds),
                     type: 'GET',
                     success: function(data) {
                         $('#subject_id').empty().append(
-                            '<option value="">Select Subject</option>');
+                            '<option value="">Select Subjects</option>');
                         $.each(data, function(key, value) {
                             $('#subject_id').append('<option value="' + value.id +
                                 '">' + value.name + '</option>');
                         });
                         $('#chapter_id').empty().append(
-                            '<option value="">Select Chapter</option>');
-                        $('.select2-single').select2();
+                            '<option value="">Enter Chapters Name</option>');
+                        $('.select2-multiple').select2();
                     },
                     error: function(error){
                         $('#subject_id').empty().append('<option value="">Select Subject</option>');
@@ -121,8 +121,8 @@
                     }
                 });
             } else {
-                $('#subject_id').empty().append('<option value="">Select Subject</option>');
-                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
+                $('#subject_id').empty().append('<option value="">Select Subjects</option>');
+                $('#chapter_id').empty().append('<option value="">Enter Chapters Name</option>');
             }
         });
     });

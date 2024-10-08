@@ -102,16 +102,16 @@
                         name: 'topic_boards'
                     },
                     {
-                        data: 'topic_classroom',
-                        name: 'topic_classroom'
+                        data: 'topic_classes',
+                        name: 'topic_classes'
                     },
                     {
-                        data: 'topic_subject',
-                        name: 'topic_subject'
+                        data: 'topic_subjects',
+                        name: 'topic_subjects'
                     },
                     {
-                        data: 'topic_chapter',
-                        name: 'topic_chapter'
+                        data: 'topic_chapters',
+                        name: 'topic_chapters'
                     },
                     {
                         data: 'name',

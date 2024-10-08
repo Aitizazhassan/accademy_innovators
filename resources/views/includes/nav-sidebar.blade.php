@@ -168,13 +168,13 @@
                     </li>
                     @endcan
 
-                    @can('mcqs.view')
+                    {{-- @can('mcqs.view')
                     <li class="nav-main-item">
                         <a class="nav-main-link {{ in_array(Route::currentRouteName(), ['mcqs.pdfBookFormat']) ? 'active' : '' }}" href="{{ route('mcqs.pdfBookFormat') }}">
                             <i class="nav-main-link-icon fa fa-file-pdf"></i><span class="nav-main-link-name">Book format PDF</span>
                         </a>
                     </li>
-                    @endcan
+                    @endcan --}}
                 </ul>
             </li>
         </ul>

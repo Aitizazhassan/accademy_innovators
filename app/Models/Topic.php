@@ -40,6 +40,16 @@ class Topic extends Model
     // {
     //     return $this->belongsToMany(Chapter::class, 'topic_chapter', 'topic_id','chapter_id');
     // }
+
+    public function classes()
+    {
+        return $this->belongsToMany(Classroom::class, 'topic_class', 'topic_id', 'classroom_id');
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'topic_subject', 'topic_id', 'subject_id');
+    }
     
     public function chapters()
     {

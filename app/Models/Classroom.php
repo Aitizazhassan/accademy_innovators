@@ -42,4 +42,14 @@ class Classroom extends Model
     {
         return $this->belongsToMany(MCQs::class);
     }
+
+    public function chapters()
+    {
+        return $this->belongsToMany(Chapter::class, 'chapter_class', 'chapter_id', 'classroom_id');
+    }
+
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class, 'topic_class', 'topic_id', 'classroom_id');
+    }
 }

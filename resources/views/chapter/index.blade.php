@@ -101,12 +101,12 @@
                         name: 'chapter_boards'
                     },
                     {
-                        data: 'chapter_classroom',
-                        name: 'chapter_classroom'
+                        data: 'chapter_classes',
+                        name: 'chapter_classes'
                     },
                     {
-                        data: 'chapter_subject',
-                        name: 'chapter_subject'
+                        data: 'chapter_subjects',
+                        name: 'chapter_subjects'
                     },
                     {
                         data: 'name',

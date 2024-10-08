@@ -10,7 +10,7 @@ class Chapter extends Model
 {
     use HasFactory;
 
-    use SoftDeletes;
+    // use SoftDeletes;
 
     protected $fillable = [
 
@@ -31,6 +31,11 @@ class Chapter extends Model
 
     }
 
+    public function classes()
+    {
+        return $this->belongsToMany(Classroom::class, 'chapter_class', 'chapter_id', 'classroom_id');
+    }
+
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'chapter_subject', 'chapter_id', 'subject_id');
@@ -40,9 +45,14 @@ class Chapter extends Model
         return $this->belongsToMany(Chapter::class, 'chapter_subject', 'subject_id', 'chapter_id');
     }
 
+    // public function topics()
+    // {
+    //     return $this->hasMany(Topic::class);
+    // }
+
     public function topics()
     {
-        return $this->hasMany(Topic::class);
+        return $this->belongsToMany(Topic::class, 'topic_chapter');
     }
 
 //    public function topics()

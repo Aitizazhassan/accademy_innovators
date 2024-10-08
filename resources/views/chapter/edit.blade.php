@@ -22,15 +22,14 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group mb-4">
                             <label for="class">Class Name</label>
-                            <select name="class_id" id="class_id" class="form-control form-contol-sm select2-single" required>
-                            <option disabled value="">Select</option>
-                                @forelse ($classes as $row)
-                                    <option value="{{ $row->id }}" {{ old('class_id', $chapter->classroom->id == $row->id) ? 'selected' : '' }}>
-                                        {{ $row->name }}
+                            <select name="class_id[]" id="class_id" class="form-control form-contol-sm select2-multiple"  multiple required>
+                            <option disabled value="">Select Classes</option>
+                                @foreach($classes as $class)
+                                    <option value="{{ $class->id }}" 
+                                        {{ in_array($class->id, $chapter->classes->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                        {{ $class->name }}
                                     </option>
-                                @empty
-                                    <option value="">No Class found</option>
-                                @endforelse
+                                @endforeach
                             </select>
                             <x-input-error-field :messages="$errors->get('class_id')" class="mt-2" />
                         </div>
@@ -38,15 +37,14 @@
                     <div class="col-xl-6 order-xl-0">
                         <div class="form-group mb-4">
                             <label for="Subject">Subject Name</label>
-                            <select name="subject_id" id="subject_id" class="form-control form-contol-sm select2-single" required>
-                            <option disabled value="">Select</option>
-                                @forelse ($subjects as $row)
-                                    <option value="{{ $row->id }}" {{ old('subject_id', $chapter->subject->id == $row->id) ? 'selected' : '' }}>
-                                        {{ $row->name }}
-                                    </option>
-                                @empty
-                                    <option value="">No subjects found</option>
-                                @endforelse
+                            <select name="subject_id[]" id="subject_id" class="form-control form-contol-sm select2-multiple" multiple required>
+                            <option disabled value="">Select Subjects</option>
+                            @foreach($subjects as $subject)
+                                <option value="{{ $subject->id }}" 
+                                    {{ in_array($subject->id, $chapter->subjects->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                    {{ $subject->name }}
+                                </option>
+                            @endforeach
                             </select>
                             <x-input-error-field :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
@@ -75,32 +73,36 @@
 
 </x-app-layout>
 <script>
-    $(document).ready(function() {
-        $('.js-example-basic-multiple').select2();
-        $('.select2-single').select2();
+     $(document).ready(function() {
+        $('.select2-multiple').select2();
         var getSubjectsUrl = "{{ route('getSubjects', ':class_id') }}";  
 
         $('#class_id').change(function() {
-            var classId = $(this).val();
-            if (classId) {
+            var classIds = $(this).val();
+            if (classIds && classIds.length > 0) {
                 $.ajax({
-                    url: getSubjectsUrl.replace(':class_id', classId),
+                    url: getSubjectsUrl.replace(':class_id', classIds.join(',')),
                     type: 'GET',
                     success: function(data) {
-                        $('#subject_id').empty().append(
-                            '<option value="">Select Subject</option>');
+                        // Get existing selected subjects
+                        var selectedSubjects = $('#subject_id').val() || [];
+
+                        // Clear the subject dropdown
+                        $('#subject_id').empty().append('<option value="">Select Subject</option>');
+
+                        // Append new subjects to the dropdown and maintain valid selections
                         $.each(data, function(key, value) {
-                            $('#subject_id').append('<option value="' + value.id +
-                                '">' + value.name + '</option>');
+                            $('#subject_id').append('<option value="' + value.id + '">' + value.name + '</option>');
                         });
-                        $('#chapter_id').empty().append(
-                            '<option value="">Select Chapter</option>');
-                        $('.select2-single').select2();
+
+                        // Keep only valid selected subjects
+                        $('#subject_id').val(selectedSubjects.filter(id => data.some(subject => subject.id == id)));
+                        $('.select2-multiple').select2(); // Re-initialize select2
                     }
                 });
             } else {
+                // If no class is selected, clear subjects
                 $('#subject_id').empty().append('<option value="">Select Subject</option>');
-                $('#chapter_id').empty().append('<option value="">Select Chapter</option>');
             }
         });
     });

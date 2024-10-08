@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('topic_chapter', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('topic_id');
-            $table->unsignedBigInteger('chapter_id');
+            $table->foreignId('topic_id')->constrained()->onDelete('cascade');
+            $table->foreignId('chapter_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-
-            $table->foreign('topic_id')->references('id')->on('topics')->onDelete('cascade');
-            $table->foreign('chapter_id')->references('id')->on('chapters')->onDelete('cascade');
         });
     }
 
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('topics_chapter');
+        Schema::dropIfExists('topic_chapter');
     }
 };

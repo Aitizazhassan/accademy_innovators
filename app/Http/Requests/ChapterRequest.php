@@ -15,7 +15,7 @@ class ChapterRequest extends FormRequest
     {
         
         return [
-            'name' => 'required',
+            'name' => 'required|string|max:255',
             'subject_id' => 'required'
         ];
 

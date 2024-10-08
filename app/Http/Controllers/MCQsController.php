@@ -226,22 +226,26 @@ class MCQsController extends Controller
     public function getChapters($subject_id)
     {
         $subjectIds = explode(',', $subject_id);
-        $chapters = [];
-        
+        $chapters = collect(); // Initialize a collection to store unique chapters
+
         if (is_array($subjectIds) && count($subjectIds) > 0) {
             $subjects = Subject::whereIn('id', $subjectIds)->with('chapters')->get();
             
             foreach ($subjects as $subject) {
-                $chapters = array_merge($chapters, $subject->chapters->toArray());
+                // Merge chapters into the collection
+                $chapters = $chapters->merge($subject->chapters);
             }
         } else {
             $subject = Subject::with('chapters')->find($subject_id);
             if ($subject) {
-                $chapters = $subject->chapters->toArray();
+                $chapters = $subject->chapters;
             }
         }
 
-        return response()->json($chapters);
+        // Filter out duplicates based on the chapter ID
+        $uniqueChapters = $chapters->unique('id')->values()->all();
+
+        return response()->json($uniqueChapters);
     }
 
     // public function getTopics($chapter_id)
@@ -256,22 +260,26 @@ class MCQsController extends Controller
     public function getTopics($chapter_id)
     {
         $chapterIds = explode(',', $chapter_id);
-        $topics = [];
+        $topics = collect(); // Initialize a collection to store topics
 
         if (is_array($chapterIds) && count($chapterIds) > 0) {
             $chapters = Chapter::whereIn('id', $chapterIds)->with('topics')->get();
-            
+
             foreach ($chapters as $chapter) {
-                $topics = array_merge($topics, $chapter->topics->toArray());
+                // Merge topics into the collection, avoiding duplicates
+                $topics = $topics->merge($chapter->topics);
             }
         } else {
             $chapter = Chapter::with('topics')->find($chapter_id);
             if ($chapter) {
-                $topics = $chapter->topics->toArray();
+                $topics = $chapter->topics;
             }
         }
 
-        return response()->json($topics);
+        // Filter out duplicates based on the topic ID
+        $uniqueTopics = $topics->unique('id')->values()->all();
+
+        return response()->json($uniqueTopics);
     }
 
     public function store(Request $request)
@@ -604,7 +612,8 @@ class MCQsController extends Controller
         return view('mcqs-question.test-format.index', compact('activeMenu', 'pageHead', 'pageTitle', 'countries'));
         
     }
-
+    
+    // book format 
     public function getBookFormatPdf(Request $request)
     { 
         $rules = [
@@ -647,64 +656,99 @@ class MCQsController extends Controller
         $numMockTests = $request->input('numMockTests', 0);
         $numQuestionsPerMockTest = $request->input('questionsPerMockTest', 0);
         $questionsPerSubjectMockTest = $request->input('questionsPerSubjectMockTest', 0);
+        $countryId = $request->input('country_id', 0); 
+        $boardId = $request->input('board_id', 0);
+        $classId = $request->input('class_id', 0);
 
         switch ($type) {
             case 'chapter_wise':
-                return $this->generateChapterwisePdf($subjects, $chapters, $request->chapterWiseMcqs, 'book');
+                return $this->generateChapterwisePdf($subjects, $chapters, $request->chapterWiseMcqs, 'book',  $countryId, $boardId, $classId);
                 break;
 
             case 'grand_test':
-                return $this->generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters, 'book');
+                return $this->generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters, 'book', $countryId, $boardId, $classId);
                 break;
 
             case 'mock_test':
-                return $this->generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $subjects, 'book');
+                return $this->generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $subjects, 'book', $countryId, $boardId, $classId);
                 break;
 
             default:
                 return response()->json(['success' => false, 'message' => 'Invalid PDF type']);
         }
-
-        // if ($mcqs) {
-        //     $mcqs = collect($mcqs)->map(function ($subject) {
-        //         return collect($subject)->map(function ($chapter) {
-        //             return $chapter->map(function ($mcq) {
-        //                 $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
-        //                 $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
-        //                 return $mcq;
-        //             });
-        //         });
-        //     });
-
-        //     $pdf = PDF::loadView('mcqs-question.mcqs_book_format_pdf', compact('mcqs'));
-
-        //     $directoryPath = storage_path('app/public/mcqs-pdfs');
-
-        //     if (File::exists($directoryPath)) {
-        //         File::cleanDirectory($directoryPath);
-        //     } else {
-        //         File::makeDirectory($directoryPath, 0755, true);
-        //     }
-
-        //     $fileName = 'mcqs-' . time() . '.pdf';
-        //     $filePath = $directoryPath . '/' . $fileName;
-        //     $pdf->save($filePath);
-
-        //     $pdfUrl = Storage::url('mcqs-pdfs/' . $fileName);
-
-        //     return response()->json(['success' => true, 'pdf_url' => $pdfUrl]);
-        // } else {
-        //     return response()->json(['success' => false]);
-        // }
     }
 
+    // test format 
+    public function getTestFormatPdf(Request $request)
+    { 
+        $rules = [
+            'country_id' => 'required',
+            'board_id' => 'required',
+            'class_id' => 'required',
+            'select_pathern' => 'required|in:chapter_wise,grand_test,mock_test',
+            'subject_id' => 'required',
+        ];
+    
+        if ($request->select_pathern == 'chapter_wise') {
+            $rules['chapter_id'] = 'required|array';
+            $rules['chapterWiseMcqs'] = 'required|string';
+        }
+    
+        if ($request->select_pathern == 'grand_test') {
+            $rules['chapter_id'] = 'required|array';
+            // $rules['grandTestTopics'] = 'required';
+            $rules['numGrandTests'] = 'required|integer';
+            $rules['questionsPerGrandTest'] = 'required|integer';
+            $rules['questionsPerSubjectGrandTest'] = 'required|integer';
+        }
+    
+        if ($request->select_pathern == 'mock_test') {
+            $rules['numMockTests'] = 'required|integer';
+            $rules['questionsPerMockTest'] = 'required|integer';
+            $rules['questionsPerSubjectMockTest'] = 'required|integer';
+        }
+    
+        $validatedData = $request->validate($rules);
+        $mcqs = collect();
 
+        $type = $request->input('select_pathern');
 
-    private function generateChapterwisePdf($subject, $chapters, $takeMcqs, $format)
+        $subjects = $request->input('subject_id', []);
+        $chapters = $request->input('chapter_id', []);
+        $numGrandTests = $request->input('numGrandTests', 0);
+        $numQuestionsPerTest = $request->input('questionsPerGrandTest', 0);
+        $numQuestionsPerSubject = $request->input('questionsPerSubjectGrandTest', 0);
+        $numMockTests = $request->input('numMockTests', 0);
+        $numQuestionsPerMockTest = $request->input('questionsPerMockTest', 0);
+        $questionsPerSubjectMockTest = $request->input('questionsPerSubjectMockTest', 0);
+        
+        $countryId = $request->input('country_id', 0); 
+        $boardId = $request->input('board_id', 0);
+        $classId = $request->input('class_id', 0);
+
+        switch ($type) {
+            case 'chapter_wise':
+                return $this->generateChapterwisePdf($subjects, $chapters, $request->chapterWiseMcqs, 'test', $countryId, $boardId, $classId);
+                break;
+
+            case 'grand_test':
+                return $this->generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters, 'test', $countryId, $boardId, $classId);
+                break;
+
+            case 'mock_test':
+                return $this->generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $subjects, 'test', $countryId, $boardId, $classId);
+                break;
+
+            default:
+                return response()->json(['success' => false, 'message' => 'Invalid PDF type']);
+        }
+    }
+
+    private function generateChapterwisePdf($subject, $chapters, $takeMcqs, $format, $countryId, $boardId, $classId)
     {
         // Fetch MCQs based on the selected subjects and chapters
         $subject = Subject::find($subject);
-        $mcqs = $this->getMCQsForChapters($subject, $chapters, $takeMcqs);
+        $mcqs = $this->getMCQsForChapters($subject, $chapters, $takeMcqs, $countryId, $boardId, $classId);
 
         if ($mcqs && collect($mcqs)->filter()->isNotEmpty()) {
             $mcqs = collect($mcqs)->map(function ($subject) {
@@ -748,10 +792,10 @@ class MCQsController extends Controller
         }
     }
 
-    private function generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters, $format)
+    private function generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters, $format, $countryId, $boardId, $classId)
     {
         // Fetch MCQs based on the selected subjects and chapters
-        $mcqs = $this->getMCQsForGrandTest($subjects, $chapters, $numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject);
+        $mcqs = $this->getMCQsForGrandTest($subjects, $chapters, $numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $countryId, $boardId, $classId);
 
         if ($mcqs && collect($mcqs)->filter()->isNotEmpty()) {
             $mcqs = collect($mcqs)->map(function ($subject) {
@@ -797,10 +841,10 @@ class MCQsController extends Controller
         }
     }
 
-    private function generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $subjects, $format)
+    private function generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $subjects, $format, $countryId, $boardId, $classId)
     {
         // Fetch MCQs based on the selected subjects
-        $mcqs = $this->getMCQsForMockTest($subjects, $numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest);
+        $mcqs = $this->getMCQsForMockTest($subjects, $numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $countryId, $boardId, $classId);
         if ($mcqs) {
             // Filter out empty arrays
             $mcqs = collect($mcqs)->filter(function ($subject) {
@@ -825,9 +869,6 @@ class MCQsController extends Controller
             
             // Flatten structure for easier processing in the view
             $flattenedMcqs = [];
-            // foreach ($mcqs as $subject => $chapters) {
-            //     $flattenedMcqs[$subject] = $chapters->flatten(1);
-            // }
 
             if($format == 'book'){
                 // Generate PDF
@@ -861,34 +902,52 @@ class MCQsController extends Controller
 
     
 
-    private function getMCQsForChapters($subject, $chapters, $takeMcqs)
+    private function getMCQsForChapters($subject, $chapters, $takeMcqs, $countryId, $boardId, $classId)
     {
         $mcqs = [];
         $usedMcqIds = []; // Track already selected MCQ IDs
-
+         
         if ($subject) {
             foreach ($chapters as $chapterId) {
-                $chapter = Chapter::find($chapterId);
-
-                if ($chapter && $chapter->subject_id == $subject->id) {
-                    // Fetch MCQs for the chapter and exclude previously used MCQs
-                    $chapterMcqs = Mcqs::with('subjects', 'chapters')
-                        ->whereHas('subjects', function($q) use ($subject) {
-                            $q->where('subjects.id', $subject->id);
-                        })
-                        ->whereHas('chapters', function($q) use ($chapter) {
-                            $q->where('chapters.id', $chapter->id);
-                        })
-                        ->whereNotIn('id', $usedMcqIds) // Exclude already used MCQs
-                        ->inRandomOrder()
-                        ->take($takeMcqs)
-                        ->get();
-
-                    // Add the new MCQs to the list and track their IDs
-                    $mcqs[$chapter->name][$subject->name] = $chapterMcqs;
-
-                    // Add the selected MCQ IDs to the array to avoid duplication
-                    $usedMcqIds = array_merge($usedMcqIds, $chapterMcqs->pluck('id')->toArray());
+                $chapter = Chapter::with(['subjects' => function ($q) use ($subject) {
+                        $q->where('subject_id', $subject->id);
+                    }])
+                    ->where('id', $chapterId)
+                    ->first();
+        
+                // Ensure the chapter is found and has the related subject
+                if ($chapter && $chapter->subjects->isNotEmpty()) {
+                    // Check if the current chapter has the specific subject
+                    $subjectRelation = $chapter->subjects->first(); // Get the first matching subject
+                    if ($subjectRelation->id == $subject->id) {
+                        // Fetch MCQs for the chapter and exclude previously used MCQs
+                        $chapterMcqs = Mcqs::with('subjects', 'chapters', 'countries', 'boards', 'classes')
+                            ->whereHas('subjects', function($q) use ($subject) {
+                                $q->where('subjects.id', $subject->id);
+                            })
+                            ->whereHas('chapters', function($q) use ($chapter) {
+                                $q->where('chapters.id', $chapter->id);
+                            })
+                            ->whereHas('countries', function ($q) use ($countryId) {
+                                $q->where('countries.id', $countryId);
+                            })
+                            ->whereHas('boards', function ($q) use ($boardId) {
+                                $q->where('boards.id', $boardId);
+                            })
+                            ->whereHas('classes', function ($q) use ($classId) {
+                                $q->where('classroom_id', $classId); // Correct reference to 'classroom_id'
+                            })
+                            ->whereNotIn('id', $usedMcqIds) // Exclude already used MCQs
+                            ->inRandomOrder()
+                            ->take($takeMcqs)
+                            ->get();
+        
+                        // Add the new MCQs to the list and track their IDs
+                        $mcqs[$chapter->name][$subject->name] = $chapterMcqs;
+        
+                        // Add the selected MCQ IDs to the array to avoid duplication
+                        $usedMcqIds = array_merge($usedMcqIds, $chapterMcqs->pluck('id')->toArray());
+                    }
                 }
             }
         }
@@ -896,47 +955,7 @@ class MCQsController extends Controller
         return $mcqs;
     }
 
-    // private function getMCQsForGrandTest($subjects, $chapters, $numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject)
-    // {
-    //     $mcqs = [];
-        
-    //     $totalQuestions = [];
-
-    //     foreach ($subjects as $subjectId) {
-    //         $subject = Subject::find($subjectId);
-    //         if ($subject) {
-    //             $mcqs[$subject->name] = [];
-
-    //             foreach ($chapters as $chapterId) {
-    //                 $chapter = Chapter::find($chapterId);
-    //                 if ($chapter && $chapter->subject_id == $subjectId) {
-    //                     $questions = Mcqs::where('subject_id', $subjectId)
-    //                         ->where('chapter_id', $chapterId)
-    //                         ->inRandomOrder()
-    //                         ->take($numQuestionsPerSubject)
-    //                         ->get();
-
-    //                     $mcqs[$subject->name][$chapter->name] = $questions;
-
-    //                     if (!isset($totalQuestions[$subject->name])) {
-    //                         $totalQuestions[$subject->name] = collect();
-    //                     }
-    //                     $totalQuestions[$subject->name] = $totalQuestions[$subject->name]->concat($questions);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     foreach ($mcqs as $subjectName => $chapters) {
-    //         $subjectTotalQuestions = $totalQuestions[$subjectName];
-    //         if ($subjectTotalQuestions->count() > $numQuestionsPerTest) {
-    //             $mcqs[$subjectName] = $subjectTotalQuestions->random($numQuestionsPerTest);
-    //         }
-    //     }
-    //     return $mcqs;
-    // }
-
-    private function getMCQsForGrandTest($subjects, $chapters, $numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject)
+    private function getMCQsForGrandTest($subjects, $chapters, $numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $countryId, $boardId, $classId)
     {
         $allMCQs = collect();
         $usedMcqIds = [];
@@ -946,22 +965,40 @@ class MCQsController extends Controller
             if ($subject) {
                 $subjectMCQs = collect();
                 foreach ($chapters as $chapterId) {
-                    $chapter = Chapter::find($chapterId);
-                    if ($chapter && $chapter->subject_id == $subjectId) {
-                        $questions = Mcqs::with('subjects', 'chapters')
-                        ->whereHas('subjects', function($q) use ($subject) {
-                            $q->where('subjects.id', $subject->id);
-                        })
-                        ->whereHas('chapters', function($q) use ($chapter) {
-                            $q->where('chapters.id', $chapter->id);
-                        })
-                        ->whereNotIn('id', $usedMcqIds)
-                        ->inRandomOrder()
-                        ->take($numQuestionsPerSubject)
-                        ->get();    
-                        $subjectMCQs = $subjectMCQs->concat($questions);
-                            // Add the selected MCQ IDs to the array to avoid duplication
-                        $usedMcqIds = array_merge($usedMcqIds, $questions->pluck('id')->toArray());
+                    $chapter = Chapter::with(['subjects' => function ($q) use ($subject) {
+                            $q->where('subject_id', $subject->id);
+                        }])
+                        ->where('id', $chapterId)
+                        ->first();
+            
+                    // Ensure the chapter is found and has the related subject
+                    if ($chapter && $chapter->subjects->isNotEmpty()) {
+                        $subjectRelation = $chapter->subjects->first(); // Get the first matching subject
+                        if ($subjectRelation->id == $subject->id) {
+                            $questions = Mcqs::with('subjects', 'chapters', 'countries', 'boards', 'classes')
+                            ->whereHas('subjects', function($q) use ($subject) {
+                                $q->where('subjects.id', $subject->id);
+                            })
+                            ->whereHas('chapters', function($q) use ($chapter) {
+                                $q->where('chapters.id', $chapter->id);
+                            })
+                            ->whereHas('countries', function ($q) use ($countryId) {
+                                $q->where('countries.id', $countryId);
+                            })
+                            ->whereHas('boards', function ($q) use ($boardId) {
+                                $q->where('boards.id', $boardId);
+                            })
+                            ->whereHas('classes', function ($q) use ($classId) {
+                                $q->where('classroom_id', $classId); // Correct reference to 'classroom_id'
+                            })
+                            ->whereNotIn('id', $usedMcqIds)
+                            ->inRandomOrder()
+                            ->take($numQuestionsPerSubject)
+                            ->get();    
+                            $subjectMCQs = $subjectMCQs->concat($questions);
+                                // Add the selected MCQ IDs to the array to avoid duplication
+                            $usedMcqIds = array_merge($usedMcqIds, $questions->pluck('id')->toArray());
+                        }
                     }
                 }
                 // Add MCQs to the overall collection, ensuring no duplicates
@@ -993,7 +1030,7 @@ class MCQsController extends Controller
         return $grandTests;
     }
 
-    private function getMCQsForMockTest($subjects, $numMockTests, $numQuestionsPerMockTest, $numQuestionsPerSubject)
+    private function getMCQsForMockTest($subjects, $numMockTests, $numQuestionsPerMockTest, $numQuestionsPerSubject, $countryId, $boardId, $classId)
     {
         $allMCQs = [];
         $usedMcqIds = [];
@@ -1005,6 +1042,15 @@ class MCQsController extends Controller
                 $questions = Mcqs::with('subjects', 'chapters')
                         ->whereHas('subjects', function($q) use ($subject) {
                             $q->where('subjects.id', $subject->id);
+                        })
+                        ->whereHas('countries', function ($q) use ($countryId) {
+                            $q->where('countries.id', $countryId);
+                        })
+                        ->whereHas('boards', function ($q) use ($boardId) {
+                            $q->where('boards.id', $boardId);
+                        })
+                        ->whereHas('classes', function ($q) use ($classId) {
+                            $q->where('classroom_id', $classId); // Correct reference to 'classroom_id'
                         })
                         ->whereNotIn('id', $usedMcqIds)
                         ->inRandomOrder()
@@ -1046,69 +1092,6 @@ class MCQsController extends Controller
         
         return $mockTests;
         
-    }
-
-    // test format 
-
-    public function getTestFormatPdf(Request $request)
-    { 
-        $rules = [
-            'country_id' => 'required',
-            'board_id' => 'required',
-            'class_id' => 'required',
-            'select_pathern' => 'required|in:chapter_wise,grand_test,mock_test',
-            'subject_id' => 'required',
-        ];
-    
-        if ($request->select_pathern == 'chapter_wise') {
-            $rules['chapter_id'] = 'required|array';
-            $rules['chapterWiseMcqs'] = 'required|string';
-        }
-    
-        if ($request->select_pathern == 'grand_test') {
-            $rules['chapter_id'] = 'required|array';
-            // $rules['grandTestTopics'] = 'required';
-            $rules['numGrandTests'] = 'required|integer';
-            $rules['questionsPerGrandTest'] = 'required|integer';
-            $rules['questionsPerSubjectGrandTest'] = 'required|integer';
-        }
-    
-        if ($request->select_pathern == 'mock_test') {
-            $rules['numMockTests'] = 'required|integer';
-            $rules['questionsPerMockTest'] = 'required|integer';
-            $rules['questionsPerSubjectMockTest'] = 'required|integer';
-        }
-    
-        $validatedData = $request->validate($rules);
-        $mcqs = collect();
-
-        $type = $request->input('select_pathern');
-
-        $subjects = $request->input('subject_id', []);
-        $chapters = $request->input('chapter_id', []);
-        $numGrandTests = $request->input('numGrandTests', 0);
-        $numQuestionsPerTest = $request->input('questionsPerGrandTest', 0);
-        $numQuestionsPerSubject = $request->input('questionsPerSubjectGrandTest', 0);
-        $numMockTests = $request->input('numMockTests', 0);
-        $numQuestionsPerMockTest = $request->input('questionsPerMockTest', 0);
-        $questionsPerSubjectMockTest = $request->input('questionsPerSubjectMockTest', 0);
-
-        switch ($type) {
-            case 'chapter_wise':
-                return $this->generateChapterwisePdf($subjects, $chapters, $request->chapterWiseMcqs, 'test');
-                break;
-
-            case 'grand_test':
-                return $this->generateGrandTestPdf($numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $subjects, $chapters, 'test');
-                break;
-
-            case 'mock_test':
-                return $this->generateMockTestPdf($numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $subjects, 'test');
-                break;
-
-            default:
-                return response()->json(['success' => false, 'message' => 'Invalid PDF type']);
-        }
     }
 
 }

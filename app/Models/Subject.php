@@ -56,9 +56,14 @@ class Subject extends Model
         return $this->belongsTo(Classroom::class);
     }
 
+    // public function chapters()
+    // {
+    //     return $this->hasMany(Chapter::class);
+    // }
+
     public function chapters()
     {
-        return $this->hasMany(Chapter::class);
+        return $this->belongsToMany(Chapter::class, 'chapter_subject');
     }
 
     public function mcqs()
@@ -70,6 +75,11 @@ class Subject extends Model
     public function mcqss()
     {
         return $this->belongsToMany(MCQs::class);
+    }
+
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class, 'topic_subject');
     }
 
 }

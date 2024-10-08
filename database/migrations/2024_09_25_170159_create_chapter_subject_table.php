@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('chapter_subject', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('chapter_id');
-            $table->unsignedBigInteger('subject_id');
+            $table->foreignId('chapter_id')->constrained()->onDelete('cascade');
+            $table->foreignId('subject_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-
-            $table->foreign('chapter_id')->references('id')->on('chapters')->onDelete('cascade');
-            $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
         });
     }
 
