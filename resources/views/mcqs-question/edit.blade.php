@@ -244,11 +244,26 @@
 </x-app-layout>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-    CKEDITOR.replace('js-ckeditor-statement');
-    CKEDITOR.replace('js-ckeditor-option-a');
-    CKEDITOR.replace('js-ckeditor-option-b');
-    CKEDITOR.replace('js-ckeditor-option-c');
-    CKEDITOR.replace('js-ckeditor-option-d');
+    CKEDITOR.replace('js-ckeditor-statement', { 
+        extraPlugins: 'notification,notificationaggregator,mathjax',
+        mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
+    });
+    CKEDITOR.replace('js-ckeditor-option-a', { 
+        extraPlugins: 'notification,notificationaggregator,mathjax',
+        mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
+    });
+    CKEDITOR.replace('js-ckeditor-option-b', { 
+        extraPlugins: 'notification,notificationaggregator,mathjax',
+        mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
+    });
+    CKEDITOR.replace('js-ckeditor-option-c', { 
+        extraPlugins: 'notification,notificationaggregator,mathjax',
+        mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
+    });
+    CKEDITOR.replace('js-ckeditor-option-d', { 
+        extraPlugins: 'notification,notificationaggregator,mathjax',
+        mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
+    });
 });
 $(document).ready(function() {
         $('.select2-single').select2();

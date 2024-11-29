@@ -298,15 +298,21 @@ class MCQsController extends Controller
             'optionD' => 'required',
             'solution_link_english' => 'nullable|string',
             'solution_link_urdu' => 'nullable|string',
+        ], [
+            'country_id.required' => 'The country selection is required.',
+            'board_id.required' => 'Please select a board.',
+            'subject_id.required' => 'Please select a subject.',
+            'chapter_id.required' => 'You must select a chapter.',
+            'topic_id.required' => 'Selecting a topic is required.',
+            'class_id.required' => 'The class field is required.',
+            'statement.required' => 'The question statement is required.',
+            'optionA.required' => 'Option A is required.',
+            'optionB.required' => 'Option B is required.',
+            'optionC.required' => 'Option C is required.',
+            'optionD.required' => 'Option D is required.',
         ]);
 
         $mcq = new MCQs();
-        // $mcq->country_id = $request->country_id;
-        // $mcq->board_id = $request->board_id;
-        // $mcq->subject_id = $request->subject_id;
-        // $mcq->chapter_id = $request->chapter_id;
-        // $mcq->topic_id = $request->topic_id;
-        // $mcq->class_id = $request->class_id;
         $mcq->statement = $request->statement;
         $mcq->optionA = $request->optionA;
         $mcq->optionB = $request->optionB;
@@ -331,24 +337,6 @@ class MCQsController extends Controller
 
     public function edit(MCQs $mcq)
     {
-        // $mcq = MCQs::with('country', 'board', 'class', 'subject', 'chapter', 'topic')->find($mcq->id);
-        // $mcq = MCQs::with(['countries', 'boards', 'classes', 'subjects', 'chapters', 'topics'])->findOrFail($mcq->id);
-
-        // $pageHead = 'Edit MCQs';
-        // $pageTitle = 'Edit MCQs';
-        // $activeMenu = 'MCQs';
-
-        // Fetch all boards, classes, subjects, chapters, and topics to populate the dropdowns
-        // $countries = Country::all();
-        // $boards = $mcq->country ? $mcq->country->board : collect();
-        // $classes = $mcq->board ? $mcq->board->classrooms : collect();
-        // $subjects = $mcq->class ? $mcq->class->subjects : collect();
-        // $chapters = $mcq->subject ? $mcq->subject->chapters : collect();
-        // $topics = $mcq->chapter ? $mcq->chapter->topics : collect();
-
-        // return view('mcqs-question.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'mcq', 'countries', 'boards', 'classes', 'subjects', 'chapters', 'topics'));
-        // return view('mcqs-question.edit', compact('activeMenu', 'pageHead', 'pageTitle', 'mcq'));
-
         $mcq = MCQs::with('countries', 'countries.board', 'boards', 'boards.classrooms', 'classes', 'classes.subjects', 'subjects', 'subjects.chapters', 'chapters', 'chapters.topics', 'topics')->findOrFail($mcq->id);
         $pageHead = 'Edit MCQs';
         $pageTitle = 'Edit MCQs';
@@ -383,13 +371,13 @@ class MCQsController extends Controller
 
     public function update(Request $request, MCQs $mcq)
     {
-        $validated = $request->validate([
+        $request->validate([
             'country_id' => 'required',
             'board_id' => 'required',
-            'class_id' => 'required',
             'subject_id' => 'required',
             'chapter_id' => 'required',
             'topic_id' => 'required',
+            'class_id' => 'required',
             'statement' => 'required',
             'optionA' => 'required',
             'optionB' => 'required',
@@ -397,6 +385,18 @@ class MCQsController extends Controller
             'optionD' => 'required',
             'solution_link_english' => 'nullable|string',
             'solution_link_urdu' => 'nullable|string',
+        ], [
+            'country_id.required' => 'The country selection is required.',
+            'board_id.required' => 'Please select a board.',
+            'subject_id.required' => 'Please select a subject.',
+            'chapter_id.required' => 'You must select a chapter.',
+            'topic_id.required' => 'Selecting a topic is required.',
+            'class_id.required' => 'The class field is required.',
+            'statement.required' => 'The question statement is required.',
+            'optionA.required' => 'Option A is required.',
+            'optionB.required' => 'Option B is required.',
+            'optionC.required' => 'Option C is required.',
+            'optionD.required' => 'Option D is required.',
         ]);
         // $mcq->update($validated);
 
@@ -623,27 +623,58 @@ class MCQsController extends Controller
             'select_pathern' => 'required|in:chapter_wise,grand_test,mock_test',
             'subject_id' => 'required',
         ];
-    
+        
         if ($request->select_pathern == 'chapter_wise') {
             $rules['chapter_id'] = 'required|array';
             $rules['chapterWiseMcqs'] = 'required|string';
         }
-    
+        
         if ($request->select_pathern == 'grand_test') {
             $rules['chapter_id'] = 'required|array';
-            // $rules['grandTestTopics'] = 'required';
             $rules['numGrandTests'] = 'required|integer';
             $rules['questionsPerGrandTest'] = 'required|integer';
             $rules['questionsPerSubjectGrandTest'] = 'required|integer';
         }
-    
+        
         if ($request->select_pathern == 'mock_test') {
             $rules['numMockTests'] = 'required|integer';
             $rules['questionsPerMockTest'] = 'required|integer';
             $rules['questionsPerSubjectMockTest'] = 'required|integer';
         }
-    
-        $validatedData = $request->validate($rules);
+        
+        $customMessages = [
+            'country_id.required' => 'Please select a country.',
+            'board_id.required' => 'Please select a board.',
+            'class_id.required' => 'Please select a class.',
+            'subject_id.required' => 'Please select a subject.',
+            'select_pathern.required' => 'You must select a test pattern.',
+            'select_pathern.in' => 'The selected test pattern is invalid.',
+        
+            // Chapter-wise custom messages
+            'chapter_id.required' => 'Please select at least one chapter for the chapter-wise pattern.',
+            'chapter_id.array' => 'Chapters must be an array.',
+            'chapterWiseMcqs.required' => 'The chapter-wise MCQs input is required.',
+            'chapterWiseMcqs.string' => 'The chapter-wise MCQs must be a string.',
+        
+            // Grand test custom messages
+            'numGrandTests.required' => 'Please provide the number of grand tests.',
+            'numGrandTests.integer' => 'The number of grand tests must be a number.',
+            'questionsPerGrandTest.required' => 'Please specify the number of questions per grand test.',
+            'questionsPerGrandTest.integer' => 'The number of questions per grand test must be an integer.',
+            'questionsPerSubjectGrandTest.required' => 'You must specify the number of questions per subject for the grand test.',
+            'questionsPerSubjectGrandTest.integer' => 'The number of questions per subject for the grand test must be an integer.',
+        
+            // Mock test custom messages
+            'numMockTests.required' => 'Please provide the number of mock tests.',
+            'numMockTests.integer' => 'The number of mock tests must be an integer.',
+            'questionsPerMockTest.required' => 'Please specify the number of questions per mock test.',
+            'questionsPerMockTest.integer' => 'The number of questions per mock test must be an integer.',
+            'questionsPerSubjectMockTest.required' => 'Please specify the number of questions per subject for the mock test.',
+            'questionsPerSubjectMockTest.integer' => 'The number of questions per subject for the mock test must be an integer.',
+        ];
+        
+        $validatedData = $request->validate($rules, $customMessages);
+        
         $mcqs = collect();
 
         $type = $request->input('select_pathern');
@@ -688,27 +719,57 @@ class MCQsController extends Controller
             'select_pathern' => 'required|in:chapter_wise,grand_test,mock_test',
             'subject_id' => 'required',
         ];
-    
+        
         if ($request->select_pathern == 'chapter_wise') {
             $rules['chapter_id'] = 'required|array';
             $rules['chapterWiseMcqs'] = 'required|string';
         }
-    
+        
         if ($request->select_pathern == 'grand_test') {
             $rules['chapter_id'] = 'required|array';
-            // $rules['grandTestTopics'] = 'required';
             $rules['numGrandTests'] = 'required|integer';
             $rules['questionsPerGrandTest'] = 'required|integer';
             $rules['questionsPerSubjectGrandTest'] = 'required|integer';
         }
-    
+        
         if ($request->select_pathern == 'mock_test') {
             $rules['numMockTests'] = 'required|integer';
             $rules['questionsPerMockTest'] = 'required|integer';
             $rules['questionsPerSubjectMockTest'] = 'required|integer';
         }
-    
-        $validatedData = $request->validate($rules);
+        
+        $customMessages = [
+            'country_id.required' => 'Please select a country.',
+            'board_id.required' => 'The board selection is required.',
+            'class_id.required' => 'Please choose a class.',
+            'subject_id.required' => 'The subject field cannot be left blank.',
+            'select_pathern.required' => 'Please select a test pattern.',
+            'select_pathern.in' => 'Invalid test pattern selected.',
+        
+            // Custom messages for chapter-wise pattern
+            'chapter_id.required' => 'You must select at least one chapter for chapter-wise.',
+            'chapter_id.array' => 'The chapters must be a valid array.',
+            'chapterWiseMcqs.required' => 'Chapter-wise MCQs input is required.',
+            'chapterWiseMcqs.string' => 'The Chapter-wise MCQs must be a string.',
+        
+            // Custom messages for grand test pattern
+            'numGrandTests.required' => 'Please provide the number of grand tests.',
+            'numGrandTests.integer' => 'The number of grand tests must be a valid number.',
+            'questionsPerGrandTest.required' => 'Please specify the number of questions per grand test.',
+            'questionsPerGrandTest.integer' => 'The number of questions per grand test must be an integer.',
+            'questionsPerSubjectGrandTest.required' => 'You must specify the number of questions per subject for the grand test.',
+            'questionsPerSubjectGrandTest.integer' => 'The number of questions per subject for the grand test must be a valid number.',
+        
+            // Custom messages for mock test pattern
+            'numMockTests.required' => 'Please provide the number of mock tests.',
+            'numMockTests.integer' => 'The number of mock tests must be a valid number.',
+            'questionsPerMockTest.required' => 'Please specify the number of questions per mock test.',
+            'questionsPerMockTest.integer' => 'The number of questions per mock test must be an integer.',
+            'questionsPerSubjectMockTest.required' => 'Please specify the number of questions per subject for the mock test.',
+            'questionsPerSubjectMockTest.integer' => 'The number of questions per subject for the mock test must be a valid number.',
+        ];
+        
+        $validatedData = $request->validate($rules, $customMessages);
         $mcqs = collect();
 
         $type = $request->input('select_pathern');
@@ -754,6 +815,7 @@ class MCQsController extends Controller
             $mcqs = collect($mcqs)->map(function ($subject) {
                 return collect($subject)->map(function ($chapter) {
                     return $chapter->map(function ($mcq) {
+                        $mcq->statement = $this->convertMathTexToImage($mcq->statement);
                         $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
                         $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
                         return $mcq;
@@ -796,22 +858,45 @@ class MCQsController extends Controller
     {
         // Fetch MCQs based on the selected subjects and chapters
         $mcqs = $this->getMCQsForGrandTest($subjects, $chapters, $numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $countryId, $boardId, $classId);
-
-        if ($mcqs && collect($mcqs)->filter()->isNotEmpty()) {
-            $mcqs = collect($mcqs)->map(function ($subject) {
+        // dd($mcqs);
+        // if ($mcqs && collect($mcqs)->filter()->isNotEmpty()) {
+        //     $mcqs = collect($mcqs)->map(function ($subject) {
+        //         return collect($subject)->map(function ($chapter) {
+        //             return $chapter->map(function ($mcq) {
+        //                 $mcq->statement = $this->convertMathTexToImage($mcq->statement);
+        //                 $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
+        //                 $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
+        //                 return $mcq;
+        //             });
+        //         });
+        //     });
+        
+        //     // Ensure there's still data after mapping
+        //     if ($mcqs->flatten(3)->isEmpty()) {
+        //         return response()->json(['success' => false, 'message' => 'No MCQs found after processing.']);
+        //     }
+        if ($mcqs) {
+            // Filter out empty arrays
+            $mcqs = collect($mcqs)->filter(function ($subject) {
+                return collect($subject)->isNotEmpty();
+            });
+        
+            // If after filtering there are no MCQs, return a failure response
+            if ($mcqs->isEmpty()) {
+                return response()->json(['success' => false, 'message' => 'No MCQs found for the selected criteria.']);
+            }
+        
+            // Process MCQs
+            $mcqs = $mcqs->map(function ($subject) {
                 return collect($subject)->map(function ($chapter) {
                     return $chapter->map(function ($mcq) {
+                        $mcq->statement = $this->convertMathTexToImage($mcq->statement);
                         $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
                         $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
                         return $mcq;
                     });
                 });
             });
-        
-            // Ensure there's still data after mapping
-            if ($mcqs->flatten(3)->isEmpty()) {
-                return response()->json(['success' => false, 'message' => 'No MCQs found after processing.']);
-            }
             if($format == 'book'){
                 $pdf = PDF::loadView('mcqs-question.pdf.grandtest', compact('numGrandTests', 'numQuestionsPerTest', 'numQuestionsPerSubject', 'subjects', 'chapters', 'mcqs'));
             } else if ($format == 'test')
@@ -845,6 +930,7 @@ class MCQsController extends Controller
     {
         // Fetch MCQs based on the selected subjects
         $mcqs = $this->getMCQsForMockTest($subjects, $numMockTests, $numQuestionsPerMockTest, $questionsPerSubjectMockTest, $countryId, $boardId, $classId);
+        // dd($mcqs);
         if ($mcqs) {
             // Filter out empty arrays
             $mcqs = collect($mcqs)->filter(function ($subject) {
@@ -860,6 +946,7 @@ class MCQsController extends Controller
             $mcqs = $mcqs->map(function ($subject) {
                 return collect($subject)->map(function ($chapter) {
                     return $chapter->map(function ($mcq) {
+                        $mcq->statement = $this->convertMathTexToImage($mcq->statement);
                         $mcq->qr_code_english = $mcq->solution_link_english ? $this->generateQrCodeImage($mcq->solution_link_english) : null;
                         $mcq->qr_code_urdu = $mcq->solution_link_urdu ? $this->generateQrCodeImage($mcq->solution_link_urdu) : null;
                         return $mcq;
@@ -957,7 +1044,7 @@ class MCQsController extends Controller
 
     private function getMCQsForGrandTest($subjects, $chapters, $numGrandTests, $numQuestionsPerTest, $numQuestionsPerSubject, $countryId, $boardId, $classId)
     {
-        $allMCQs = collect();
+        $allMCQs = [];
         $usedMcqIds = [];
 
         foreach ($subjects as $subjectId) {
@@ -994,36 +1081,56 @@ class MCQsController extends Controller
                             ->whereNotIn('id', $usedMcqIds)
                             ->inRandomOrder()
                             ->take($numQuestionsPerSubject)
-                            ->get();    
+                            ->get();   
+
                             $subjectMCQs = $subjectMCQs->concat($questions);
-                                // Add the selected MCQ IDs to the array to avoid duplication
                             $usedMcqIds = array_merge($usedMcqIds, $questions->pluck('id')->toArray());
+                    
+                            if ($subjectMCQs->count() > $numQuestionsPerSubject) {
+                                $subjectMCQs = $subjectMCQs->random($numQuestionsPerSubject);
+                            }
+                            
+                            $allMCQs[$subject->name] = $subjectMCQs;
                         }
                     }
                 }
-                // Add MCQs to the overall collection, ensuring no duplicates
-                // $allMCQs = $allMCQs->concat($subjectMCQs)->unique('id');
-                if ($subjectMCQs->count() > $numQuestionsPerSubject) {
-                    $subjectMCQs = $subjectMCQs->random($numQuestionsPerSubject);
-                }
-                $allMCQs[$subject->name] = $subjectMCQs;
             }
         }
         $grandTests = [];
+        // for ($i = 0; $i < $numGrandTests; $i++) {
+        //     $grandTests[$i] = [];
+            
+        //     foreach ($allMCQs as $subjectName => $questions) {
+        //         if ($questions->count() >= $numQuestionsPerTest) {
+        //             $questionsForTest = $questions->random($numQuestionsPerTest);
+                    
+        //             $grandTests[$i][$subjectName] = $questionsForTest;
+                    
+        //             $allMCQs[$subjectName] = $allMCQs[$subjectName]->diff($questionsForTest);
+        //         } else {
+        //             $grandTests[$i][$subjectName] = $questions;
+                    
+        //             $allMCQs[$subjectName] = $allMCQs[$subjectName]->diff($questions);
+        //         }
+        //     }
+        // }
+
         for ($i = 0; $i < $numGrandTests; $i++) {
             $grandTests[$i] = [];
             
             foreach ($allMCQs as $subjectName => $questions) {
-                if ($questions->count() >= $numQuestionsPerTest) {
-                    $questionsForTest = $questions->random($numQuestionsPerTest);
+                $availableQuestions = $questions->count();
+                
+                if ($availableQuestions > 0) {
+                    $questionsForTest = $availableQuestions >= $numQuestionsPerTest
+                        ? $questions->random($numQuestionsPerTest)
+                        : $questions;
                     
+                    // Store the selected questions
                     $grandTests[$i][$subjectName] = $questionsForTest;
                     
+                    // Remove the selected questions from the pool to avoid repetition
                     $allMCQs[$subjectName] = $allMCQs[$subjectName]->diff($questionsForTest);
-                } else {
-                    $grandTests[$i][$subjectName] = $questions;
-                    
-                    $allMCQs[$subjectName] = $allMCQs[$subjectName]->diff($questions);
                 }
             }
         }
@@ -1092,6 +1199,36 @@ class MCQsController extends Controller
         
         return $mockTests;
         
+    }
+
+    function convertMathTexToImage($html) {
+        // Load the HTML into DOMDocument
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        
+        // Create an XPath to search for elements with class 'math-tex'
+        $xpath = new \DOMXPath($dom);
+        $nodes = $xpath->query("//*[contains(@class, 'math-tex')]");
+    
+        foreach ($nodes as $node) {
+            // Get the LaTeX content from the node
+            $latexContent = $node->nodeValue;
+    
+            // URL encode the LaTeX formula for safe transmission
+            $encodedLatex = urlencode($latexContent);
+    
+            $img = $dom->createElement('img');
+            $img->setAttribute('src', "https://latex.codecogs.com/png.latex?$encodedLatex");
+            $img->setAttribute('alt', 'LaTeX Formula');
+            $img->setAttribute('style', 'display: inline;');  // Add styles if needed
+
+            // Replace the span tag with the generated image
+            $node->parentNode->replaceChild($img, $node);
+        }
+    
+        // Save and return the modified HTML
+        // dd($dom->saveHTML());
+        return $dom->saveHTML();
     }
 
 }

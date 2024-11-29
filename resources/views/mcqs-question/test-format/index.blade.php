@@ -387,10 +387,46 @@
             });
         });
 
+        // $(document).on('click', '.get-mcqs-selection', function(e) {
+        //     e.preventDefault();
+        //     let formData = new FormData($('#mcqsTestFormatForm')[0]);
+                
+        //     $.ajax({
+        //         url: "{{ route('mcqs.get.testFormatPDF') }}",
+        //         type: "POST",
+        //         data: formData,
+        //         contentType: false,
+        //         processData: false,
+        //         success: function(response) {
+        //             // window.location.href = response.pdf_url;
+        //             if(response.success)
+        //             {
+        //                 window.open(response.pdf_url, '_blank');
+        //             } else {
+        //                 showNotification('warning', response.message);
+        //             }
+        //         },
+        //         error: function(response) {
+        //             let errors = response.responseJSON.errors;
+        //             for (let field in errors) {
+        //                 let errorMessages = errors[field].join(' ');
+        //                 showNotification('danger', errorMessages);
+        //                 // $(`input[name="${field}"], select[name="${field}"]`).next('.mt-2').text(errorMessages);
+        //             }
+        //         }
+        //     });
+        // })
+
         $(document).on('click', '.get-mcqs-selection', function(e) {
             e.preventDefault();
+
+            // Disable the button and show loader
+            let button = $(this);
+            button.prop('disabled', true);
+            button.append('<i class="fa fa-spinner fa-spin ml-5"></i>'); 
+
             let formData = new FormData($('#mcqsTestFormatForm')[0]);
-                
+
             $.ajax({
                 url: "{{ route('mcqs.get.testFormatPDF') }}",
                 type: "POST",
@@ -398,9 +434,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    // window.location.href = response.pdf_url;
-                    if(response.success)
-                    {
+                    if (response.success) {
                         window.open(response.pdf_url, '_blank');
                     } else {
                         showNotification('warning', response.message);
@@ -411,11 +445,14 @@
                     for (let field in errors) {
                         let errorMessages = errors[field].join(' ');
                         showNotification('danger', errorMessages);
-                        // $(`input[name="${field}"], select[name="${field}"]`).next('.mt-2').text(errorMessages);
                     }
+                },
+                complete: function() {
+                    button.prop('disabled', false);
+                    button.find('.fa-spinner').remove(); 
                 }
             });
-        })
+        });
 
         function getSubjects(classId, callback) {
             if (classId) {

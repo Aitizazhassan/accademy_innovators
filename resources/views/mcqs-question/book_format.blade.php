@@ -20,7 +20,7 @@
                     <!-- Country Name Selection -->
                     <div class="col-xl-6 order-xl-0">
                         <div class="mb-4">
-                            <label class="form-label" for="country_id">Country Name</label>
+                            <label class="form-label" for="country_id">Country</label>
                             <select name="country_id" id="country_id" class="form-control form-control-sm select2-single">
                                 <option value="">Select Country</option>
                                 @forelse ($countries as $row)
@@ -395,8 +395,14 @@
 
         $(document).on('click', '.get-mcqs-selection', function(e) {
             e.preventDefault();
+
+            // Disable the button and show loader
+            let button = $(this);
+            button.prop('disabled', true);
+            button.append('<i class="fa fa-spinner fa-spin ml-5"></i>'); 
+
             let formData = new FormData($('#mcqsBookFormatForm')[0]);
-                
+
             $.ajax({
                 url: "{{ route('mcqs.get.bookFormatPDF') }}",
                 type: "POST",
@@ -404,9 +410,7 @@
                 contentType: false,
                 processData: false,
                 success: function(response) {
-                    // window.location.href = response.pdf_url;
-                    if(response.success)
-                    {
+                    if (response.success) {
                         window.open(response.pdf_url, '_blank');
                     } else {
                         showNotification('warning', response.message);
@@ -417,11 +421,14 @@
                     for (let field in errors) {
                         let errorMessages = errors[field].join(' ');
                         showNotification('danger', errorMessages);
-                        // $(`input[name="${field}"], select[name="${field}"]`).next('.mt-2').text(errorMessages);
                     }
+                },
+                complete: function() {
+                    button.prop('disabled', false);
+                    button.find('.fa-spinner').remove(); 
                 }
             });
-        })
+        });
 
         function getSubjects(classId, callback) {
             if (classId) {

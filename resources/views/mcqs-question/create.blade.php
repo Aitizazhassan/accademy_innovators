@@ -31,7 +31,7 @@
                                     <option value="">No Board found</option>
                                 @endforelse
                             </select>
-                            <x-input-error :messages="$errors->get('country_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('country_id')" class="mt-2" />
                         </div>
                     </div>
 
@@ -42,7 +42,7 @@
                             <select name="board_id[]" id="board_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Board</option>
                             </select>
-                            <x-input-error :messages="$errors->get('board_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('board_id')" class="mt-2" />
                         </div>
                     </div>
 
@@ -53,7 +53,7 @@
                             <select name="class_id[]" id="class_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Class</option>
                             </select>
-                            <x-input-error :messages="$errors->get('class_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('class_id')" class="mt-2" />
                         </div>
                     </div>
 
@@ -64,7 +64,7 @@
                             <select name="subject_id[]" id="subject_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Subject</option>
                             </select>
-                            <x-input-error :messages="$errors->get('subject_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('subject_id')" class="mt-2" />
                         </div>
                     </div>
 
@@ -75,7 +75,7 @@
                             <select name="chapter_id[]" id="chapter_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Chapter</option>
                             </select>
-                            <x-input-error :messages="$errors->get('chapter_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('chapter_id')" class="mt-2" />
                         </div>
                     </div>
 
@@ -86,7 +86,7 @@
                             <select name="topic_id[]" id="topic_id" multiple class="form-control form-control-sm select2-single">
                                 <option value="">Select Topic</option>
                             </select>
-                            <x-input-error :messages="$errors->get('topic_id')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('topic_id')" class="mt-2" />
                         </div>
                     </div>
 
@@ -104,7 +104,8 @@
                                 </div>
                                 <div class="block-content">
                                     <div class="mb-4">
-                                        <textarea id="js-ckeditor-statement" name="statement"></textarea>
+                                        <textarea id="js-ckeditor-statement" name="statement">{{ old('statement') }}</textarea>
+                                        <x-input-error-field :messages="$errors->get('statement')" class="mt-2" />
                                     </div>
                                 </div>
                             </div>
@@ -125,7 +126,8 @@
                                 </div>
                                 <div class="block-content">
                                     <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-a" name="optionA"></textarea>
+                                        <textarea id="js-ckeditor-option-a" name="optionA">{{ old('optionA') }}</textarea>
+                                        <x-input-error-field :messages="$errors->get('optionA')" class="mt-2" />
                                     </div>
                                 </div>
                             </div>
@@ -146,7 +148,8 @@
                                 </div>
                                 <div class="block-content">
                                     <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-b" name="optionB"></textarea>
+                                        <textarea id="js-ckeditor-option-b" name="optionB">{{ old('optionB') }}</textarea>
+                                        <x-input-error-field :messages="$errors->get('optionB')" class="mt-2" />
                                     </div>
                                 </div>
                             </div>
@@ -167,7 +170,8 @@
                                 </div>
                                 <div class="block-content">
                                     <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-c" name="optionC"></textarea>
+                                        <textarea id="js-ckeditor-option-c" name="optionC">{{ old('optionC') }}</textarea>
+                                        <x-input-error-field :messages="$errors->get('optionC')" class="mt-2" />
                                     </div>
                                 </div>
                             </div>
@@ -188,7 +192,8 @@
                                 </div>
                                 <div class="block-content">
                                     <div class="mb-4">
-                                        <textarea id="js-ckeditor-option-d" name="optionD"></textarea>
+                                        <textarea id="js-ckeditor-option-d" name="optionD">{{ old('optionD') }}</textarea>
+                                        <x-input-error-field :messages="$errors->get('optionD')" class="mt-2" />
                                     </div>
                                 </div>
                             </div>
@@ -200,7 +205,7 @@
                         <div class="mb-4">
                             <label class="form-label" for="solution_link_english">Solution Link (English)</label>
                             <input type="text" name="solution_link_english" id="solution_link_english" class="form-control form-control-sm">
-                            <x-input-error :messages="$errors->get('solution_link_english')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('solution_link_english')" class="mt-2" />
                         </div>
                     </div>
 
@@ -208,7 +213,7 @@
                         <div class="mb-4">
                             <label class="form-label" for="solution_link_urdu">Solution Link (Urdu)</label>
                             <input type="text" name="solution_link_urdu" class="form-control form-control-sm">
-                            <x-input-error :messages="$errors->get('solution_link_urdu')" class="mt-2" />
+                            <x-input-error-field :messages="$errors->get('solution_link_urdu')" class="mt-2" />
                         </div>
                     </div>
 
@@ -229,24 +234,30 @@
     <!-- END Page Content -->
 </x-app-layout>
 
-<script>Dashmix.helpersOnLoad(['js-ckeditor', 'js-simplemde']);</script>
-
+{{-- <script>Dashmix.helpersOnLoad(['js-ckeditor', 'js-simplemde']);</script> --}}
+{{-- <script src="https://cdn.ckeditor.com/4.22.1/standard-all/ckeditor.js"></script> --}}
+{{-- <script src="https://cdn.ckeditor.com/4.25.0/standard-all/ckeditor.js"></script> --}}
 <script>
         document.addEventListener("DOMContentLoaded", function() {
         CKEDITOR.replace('js-ckeditor-statement', { 
-            extraPlugins: 'notification,notificationaggregator',
+            extraPlugins: 'notification,notificationaggregator,mathjax',
+            mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
         });
         CKEDITOR.replace('js-ckeditor-option-a', { 
-            extraPlugins: 'notification,notificationaggregator',
+            extraPlugins: 'notification,notificationaggregator,mathjax',
+            mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
         });
         CKEDITOR.replace('js-ckeditor-option-b', { 
-            extraPlugins: 'notification,notificationaggregator',
+            extraPlugins: 'notification,notificationaggregator,mathjax',
+            mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
         });
         CKEDITOR.replace('js-ckeditor-option-c', { 
-            extraPlugins: 'notification,notificationaggregator',
+            extraPlugins: 'notification,notificationaggregator,mathjax',
+            mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
         });
         CKEDITOR.replace('js-ckeditor-option-d', { 
-            extraPlugins: 'notification,notificationaggregator',
+            extraPlugins: 'notification,notificationaggregator,mathjax',
+            mathJaxLib: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML',
         });
     });
     $(document).ready(function() {

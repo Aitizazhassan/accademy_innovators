@@ -40,6 +40,7 @@ Route::get('/', function () {
     // return view('welcome');
     return redirect('/login');
 });
+Route::get('/bookformat', [MCQsController::class, 'viewBookFormatPDF']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -111,7 +112,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/get/test-format', [MCQsController::class, 'testFormat'])->name('mcqs.testFormat');
 
         Route::get('/pdf-book-format/export-mcqs', [MCQsController::class, 'exportMCQsToPDF'])->name('mcqs.pdfBookFormat');
-        Route::get('/mcqs-bookformat', [MCQsController::class, 'viewBookFormatPDF']);
+       
 
         Route::post('/get/book-format-pdf', [MCQsController::class, 'getBookFormatPdf'])->name('mcqs.get.bookFormatPDF');
         Route::post('/get/test-format-pdf', [MCQsController::class, 'getTestFormatPdf'])->name('mcqs.get.testFormatPDF');

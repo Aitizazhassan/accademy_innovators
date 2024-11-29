@@ -4,12 +4,51 @@
     <title>Grand Test MCQs</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 50px;
-            border: 1px solid #000;
-            padding: 20px;
-            background-repeat: no-repeat;
+            font-family: 'Arial', sans-serif; 
+            font-size: 12pt;
+            line-height: 1.5;
+            border: 1px dashed #000;
+            color: #333;
+            margin: 0px;
+            padding: 0px 20px;
+            position: relative; /* Added to allow ::before positioning */
+        }
+
+        /* Pseudo-element for watermark */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/watermark.png'))) }}");
             background-position: center;
+            background-repeat: no-repeat;
+            background-size: 90% 70%;
+            opacity: 0.5; /* Adjust this value to lower the opacity */
+            z-index: -1;
+        }
+        
+        h1, h2, h3 {
+            margin: 10px 0;
+        }
+
+        h1 {
+            font-size: 24pt;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 18pt;
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 14pt;
+            font-weight: bold;
         }
         .header {
             text-align: center;
@@ -28,10 +67,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            /* border: 1px solid black; */
+            margin-bottom: 0px !important;
         }
         .qr-codes {
             text-align: end;
@@ -39,28 +75,37 @@
         .qr-codes p {
             margin-bottom: 0px;
         }
+        p {
+            margin: 0px;
+        }
     </style>
 </head>
 <body>
-    <h1>Grand Test MCQs</h1>
+    <div class="header">
+        <h2>Grand Test MCQs</h2>
+    </div>
     @for($i = 0; $i < $numGrandTests; $i++)
-        <h2>Grand Test {{ $i + 1 }}</h2>
+        <h4 style="text-align:center;">Grand Test {{ $i + 1 }}</h4>
+        @isset($mcqs[$i])
         @foreach($mcqs[$i] as $subject => $questions)
-            {{-- @if($questions->count() > 0) --}}
-                <h3>Subject: {{ $subject }}</h3>
-                {{-- @foreach($chapters as $chapter => $questions)
-                    <h4>Chapter: {{ $chapter }}</h4> --}}
+                <h5 style="text-transform: capitalize">Subject: {{ $subject }}</h5>
+                @if($questions->count() > 0)
                     @foreach($questions as $mcq)
                     <table>
                         <tr>
                             <td>
-                                <div class="content">
-                                    <p><strong>{{ $loop->iteration }})</strong> {!! strip_tags($mcq->statement) !!}</p>
-                                    <p><strong>A)</strong> {!! strip_tags($mcq->optionA) !!}</p>
-                                    <p><strong>B)</strong> {!! strip_tags($mcq->optionB) !!}</p>
-                                    <p><strong>C)</strong> {!! strip_tags($mcq->optionC) !!}</p>
-                                    <p><strong>D)</strong> {!! strip_tags($mcq->optionD) !!}</p>
+                                <div style="display: inline-block;padding-right:10px;">
+                                    <strong>{{ $loop->iteration }})</strong>
                                 </div>
+                                <div class="mt-0" style="display: inline-block;">
+                                    {!! $mcq->statement !!}
+                                </div>
+                                <ol style="padding-top:0px;margin-top:0px;">
+                                    <li> {!! $mcq->optionA !!}</li>
+                                    <li> {!! $mcq->optionB !!}</li>
+                                    <li> {!! $mcq->optionC !!}</li>
+                                    <li> {!! $mcq->optionD !!}</li>
+                                </ol>
                             </td>
                             <td>
                                 <div class="qr-codes">
@@ -79,10 +124,14 @@
                         </tr>
                     </table>
                     @endforeach
-                {{-- @endforeach --}}
-
-            {{-- @endif --}}
+                    @else
+                    <p style="">No Mcqs Found</p>
+                @endif
         @endforeach
+        <hr>
+        @else
+            <p style="text-align: center">No Mcqs Found</p>
+        @endif
     @endfor
 </body>
 </html>
