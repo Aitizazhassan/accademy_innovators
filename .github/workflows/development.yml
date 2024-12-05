@@ -11,13 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to production
-        uses: appleboy/ssh-action@master
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH Agent
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy Files to Server
+        run: |
+          scp -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}:${{ secrets.PATH }}
+
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@v0.1.2
         with:
           host: ${{ secrets.HOSTNAME }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: "*"
-          target: ${{ secrets.PATH }}
-          script: "cd ${{ secrets.PATH }} && ./deploy.sh"
+          script: |
+            cd ${{ secrets.PATH }}
+            ./deploy.sh
