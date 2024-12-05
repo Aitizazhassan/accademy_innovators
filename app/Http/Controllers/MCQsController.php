@@ -446,68 +446,145 @@ class MCQsController extends Controller
         }
     }
 
+    // public function downloadSingleMcqAsPptx($id)
+    // {
+    //     $mcq = Mcqs::findOrFail($id);
+    
+    //     // Create a new PHPPresentation object
+    //     $objPHPPresentation = new PhpPresentation();
+    
+    //     // Remove the default slide
+    //     $objPHPPresentation->removeSlideByIndex(0);
+    
+    //     // Create a new slide
+    //     $currentSlide = $objPHPPresentation->createSlide();
+    
+    //     // Add question text
+    //     $questionShape = $currentSlide->createRichTextShape()
+    //         ->setHeight(100)
+    //         ->setWidth(600)
+    //         ->setOffsetX(50)
+    //         ->setOffsetY(50);
+    //     $questionShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    //     $textRun = $questionShape->createTextRun(str_replace('&nbsp;', ' ', $this->stripHtmlTags($mcq->statement)));
+    //     $textRun->getFont()->setBold(true)
+    //         ->setSize(18)
+    //         ->setColor(new Color('FF000000'));
+    
+    //     // Add options
+    //     $options = [
+    //         'A' => $this->stripHtmlTags($mcq->optionA),
+    //         'B' => $this->stripHtmlTags($mcq->optionB),
+    //         'C' => $this->stripHtmlTags($mcq->optionC),
+    //         'D' => $this->stripHtmlTags($mcq->optionD)
+    //     ];
+    //     $offsetY = 150;
+    //     foreach ($options as $key => $value) {
+    //         $optionShape = $currentSlide->createRichTextShape()
+    //             ->setHeight(50)
+    //             ->setWidth(600)
+    //             ->setOffsetX(50)
+    //             ->setOffsetY($offsetY);
+    //         $textRun = $optionShape->createTextRun("{$key}) {$value}");
+    //         $textRun->getFont()->setSize(16)
+    //             ->setColor(new Color('FF000000'));
+    //         $offsetY += 60;
+    //     }
+    
+    //     // Generate QR codes for solution links
+    //     $qrCodeOffsetY = $offsetY + 50;
+    //     if (!empty($mcq->solution_link_english)) {
+    //         $this->addQrCodeToSlide($currentSlide, $mcq->solution_link_english, 'English Solution', 50, $qrCodeOffsetY);
+    //     }
+    //     if (!empty($mcq->solution_link_urdu)) {
+    //         $this->addQrCodeToSlide($currentSlide, $mcq->solution_link_urdu, 'Urdu Solution', 200, $qrCodeOffsetY); 
+    //     }
+    
+    //     // Save the presentation to a temporary file
+    //     $pptxFile = storage_path('app/public/mcq_' . $id . '.pptx');
+    //     $objWriter = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
+    //     $objWriter->save($pptxFile);
+    
+    //     // Return the file as a download response
+    //     return response()->download($pptxFile)->deleteFileAfterSend(true);
+    // }
+
     public function downloadSingleMcqAsPptx($id)
-    {
-        $mcq = Mcqs::findOrFail($id);
-    
-        // Create a new PHPPresentation object
-        $objPHPPresentation = new PhpPresentation();
-    
-        // Remove the default slide
-        $objPHPPresentation->removeSlideByIndex(0);
-    
-        // Create a new slide
-        $currentSlide = $objPHPPresentation->createSlide();
-    
-        // Add question text
-        $questionShape = $currentSlide->createRichTextShape()
-            ->setHeight(100)
-            ->setWidth(600)
-            ->setOffsetX(50)
-            ->setOffsetY(50);
-        $questionShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $textRun = $questionShape->createTextRun(str_replace('&nbsp;', ' ', $this->stripHtmlTags($mcq->statement)));
-        $textRun->getFont()->setBold(true)
-            ->setSize(18)
+{
+    $mcq = Mcqs::findOrFail($id);
+
+    // Create a new PHPPresentation object
+    $objPHPPresentation = new PhpPresentation();
+
+    // Remove the default slide
+    $objPHPPresentation->removeSlideByIndex(0);
+
+    // Create a new slide
+    $currentSlide = $objPHPPresentation->createSlide();
+
+    // Define initial offsets
+    $offsetX = 50;
+    $offsetY = 50;
+
+    // Add question statement
+    $questionShape = $currentSlide->createRichTextShape()
+        ->setHeight(0) // Start with 0; the height will adjust dynamically
+        ->setWidth(600) // Set width for proper text wrapping
+        ->setOffsetX($offsetX)
+        ->setOffsetY($offsetY);
+    $questionShape->getActiveParagraph()->getAlignment()
+        ->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    $textRun = $questionShape->createTextRun($this->stripHtmlTags($mcq->statement));
+    $textRun->getFont()->setBold(true)
+        ->setSize(18)
+        ->setColor(new Color('FF000000'));
+
+    // Dynamically calculate height of the question text
+    $questionHeight = $this->calculateTextHeight($mcq->statement, 600, 18);
+    $questionShape->setHeight($questionHeight);
+
+    // Adjust offset for options
+    $offsetY += $questionHeight + 20; // Add space below the question
+
+    // Add options
+    $options = [
+        'A' => $this->stripHtmlTags($mcq->optionA),
+        'B' => $this->stripHtmlTags($mcq->optionB),
+        'C' => $this->stripHtmlTags($mcq->optionC),
+        'D' => $this->stripHtmlTags($mcq->optionD),
+    ];
+    foreach ($options as $key => $value) {
+        $optionShape = $currentSlide->createRichTextShape()
+            ->setHeight(50)
+            ->setWidth(600) // Set width for wrapping
+            ->setOffsetX($offsetX)
+            ->setOffsetY($offsetY);
+        $optionShape->getActiveParagraph()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $textRun = $optionShape->createTextRun("{$key}) {$value}");
+        $textRun->getFont()->setSize(16)
             ->setColor(new Color('FF000000'));
-    
-        // Add options
-        $options = [
-            'A' => $this->stripHtmlTags($mcq->optionA),
-            'B' => $this->stripHtmlTags($mcq->optionB),
-            'C' => $this->stripHtmlTags($mcq->optionC),
-            'D' => $this->stripHtmlTags($mcq->optionD)
-        ];
-        $offsetY = 150;
-        foreach ($options as $key => $value) {
-            $optionShape = $currentSlide->createRichTextShape()
-                ->setHeight(50)
-                ->setWidth(600)
-                ->setOffsetX(50)
-                ->setOffsetY($offsetY);
-            $textRun = $optionShape->createTextRun("{$key}) {$value}");
-            $textRun->getFont()->setSize(16)
-                ->setColor(new Color('FF000000'));
-            $offsetY += 60;
-        }
-    
-        // Generate QR codes for solution links
-        $qrCodeOffsetY = $offsetY + 50;
-        if (!empty($mcq->solution_link_english)) {
-            $this->addQrCodeToSlide($currentSlide, $mcq->solution_link_english, 'English Solution', 50, $qrCodeOffsetY);
-        }
-        if (!empty($mcq->solution_link_urdu)) {
-            $this->addQrCodeToSlide($currentSlide, $mcq->solution_link_urdu, 'Urdu Solution', 200, $qrCodeOffsetY); 
-        }
-    
-        // Save the presentation to a temporary file
-        $pptxFile = storage_path('app/public/mcq_' . $id . '.pptx');
-        $objWriter = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
-        $objWriter->save($pptxFile);
-    
-        // Return the file as a download response
-        return response()->download($pptxFile)->deleteFileAfterSend(true);
+
+        // Adjust offset for next option
+        $offsetY += 60; // Space between options
     }
+
+    // Adjust offset for QR codes
+    $qrCodeOffsetY = $offsetY + 20; // Add space below the options
+    if (!empty($mcq->solution_link_english)) {
+        $this->addQrCodeToSlide($currentSlide, $mcq->solution_link_english, 'English Solution', 50, $qrCodeOffsetY);
+    }
+    if (!empty($mcq->solution_link_urdu)) {
+        $this->addQrCodeToSlide($currentSlide, $mcq->solution_link_urdu, 'Urdu Solution', 250, $qrCodeOffsetY);
+    }
+
+    // Save the presentation to a temporary file
+    $pptxFile = storage_path('app/public/mcq_' . $id . '.pptx');
+    $objWriter = IOFactory::createWriter($objPHPPresentation, 'PowerPoint2007');
+    $objWriter->save($pptxFile);
+
+    // Return the file as a download response
+    return response()->download($pptxFile)->deleteFileAfterSend(true);
+}
     
     private function addQrCodeToSlide($slide, $link, $label, $offsetX, $offsetY)
     {
@@ -540,7 +617,19 @@ class MCQsController extends Controller
     
     private function stripHtmlTags($content)
     {
-        return strip_tags($content);
+        // return strip_tags($content);
+        return html_entity_decode(strip_tags($content));
+    }
+
+    /**
+     * Function to calculate text height dynamically based on content, width, and font size.
+     */
+    private function calculateTextHeight($text, $width, $fontSize)
+    {
+        // Approximate number of characters that fit in one line
+        $charsPerLine = floor($width / ($fontSize * 0.6));
+        $lines = ceil(strlen($text) / $charsPerLine);
+        return $lines * $fontSize * 1.5; // 1.5 is the line-height multiplier
     }
 
     // genrate Qr scan code to provide link
