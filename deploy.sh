@@ -11,7 +11,7 @@ echo "Deploying application ..."
     # git pull origin development
     
     # Install dependencies based on lock file
-    composer install --no-interaction --prefer-dist --optimize-autoloader
+    composer2 install --no-interaction --prefer-dist --optimize-autoloader
     
     # Migrate database
     php artisan migrate --force

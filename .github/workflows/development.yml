@@ -25,9 +25,9 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p ${{ secrets.PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }} "echo 'Connection successful'"
 
-      - name: Copy Files to Server
-        run: |
-          scp -P ${{ secrets.PORT }} -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}:${{ secrets.PATH }}
+      # - name: Copy Files to Server
+      #   run: |
+      #     scp -P ${{ secrets.PORT }} -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}:${{ secrets.PATH }}
           
       - name: Set Executable Permission for deploy.sh
         run: |
