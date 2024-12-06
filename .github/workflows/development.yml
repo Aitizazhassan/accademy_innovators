@@ -21,13 +21,13 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # - name: Test SSH Connection
-      #   run: |
-      #     ssh -o StrictHostKeyChecking=no -p 65002 ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }} "echo 'Connection successful'"
+      - name: Test SSH Connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }} "echo 'Connection successful'"
 
-      # - name: Copy Files to Server
-      #   run: |
-      #     scp -P 65002 -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}:${{ secrets.PATH }}
+      - name: Copy Files to Server
+        run: |
+          scp -P ${{ secrets.PORT }} -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}:${{ secrets.PATH }}
 
       - name: Deploy on Server
         uses: appleboy/ssh-action@v0.1.2
@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           port: ${{ secrets.PORT }}
           password: ${{ secrets.PASSWORD }}
-          source: "*"
-          target: ${{ secrets.PATH }}
-          script: "cd ${{ secrets.PATH }} && ./deploy.sh"
+          script: |
+            cd ${{ secrets.PATH }}
+            ./deploy.sh
 
