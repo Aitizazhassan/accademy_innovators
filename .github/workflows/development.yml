@@ -28,6 +28,10 @@ jobs:
       - name: Copy Files to Server
         run: |
           scp -P ${{ secrets.PORT }} -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}:${{ secrets.PATH }}
+          
+      - name: Set Executable Permission for deploy.sh
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }} "chmod +x ${ { secrets.PATH }}/deploy.sh"    
 
       - name: Deploy on Server
         uses: appleboy/ssh-action@v0.1.2
