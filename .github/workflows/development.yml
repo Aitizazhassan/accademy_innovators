@@ -6,24 +6,28 @@ on:
       - development
 
 jobs:
-  build:
-    name: Build and Deploy
+  web-deploy:
+    name: 🎉 Deploy via FTP
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      # Step 1: Checkout the latest code from the repository
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
 
-      - name: Set up SSH Agent
-        uses: webfactory/ssh-agent@v0.7.0
+      # Step 2: Deploy files to the FTP server
+      - name: 📂 Sync files to FTP server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: . # Specify the directory to upload (default is the root of your repository)
+          server-dir: ${{ secrets.FTP_PATH }} # Remote directory on your FTP server
 
-      - name: Copy Files to Server
-        run: |
-          scp -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOSTNAME }}:${{ secrets.PATH }}
-
-      - name: Deploy on Server
+      # Step 3 (Optional): Post-deployment script
+      # If you need to execute commands on the server after uploading files
+      - name: Run Post-deployment Script (Optional)
         uses: appleboy/ssh-action@v0.1.2
         with:
           host: ${{ secrets.HOSTNAME }}
